@@ -1,5 +1,15 @@
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/UiServiceApplication.java
+/home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/config/S3Config.java
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/config/SecurityConfig.java
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/controller/AuthController.java
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/controller/PresentationViewController.java
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/controller/PresenterViewController.java
+/home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/exception/UserAlreadyExistsException.java
+/home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/model/Role.java
+/home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/model/User.java
+/home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/repository/UserRepository.java
+/home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/service/CustomOAuth2UserService.java
+/home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/service/CustomUserDetailsService.java
+/home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/service/EmailService.java
+/home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/service/SlideUploadService.java
+/home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/service/UserService.java
