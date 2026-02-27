@@ -11,7 +11,8 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
 /**
- * Slide individual dentro de una presentación (PLAN-EXPANSION.md Fase 2, tarea 19).
+ * Slide individual dentro de una presentación (PLAN-EXPANSION.md Fase 2, tarea
+ * 19).
  *
  * La URL pública del asset corresponde al objeto en S3:
  * https://{bucket}.s3.{region}.amazonaws.com/slides/{presentationId}/{number}.png
@@ -36,7 +37,9 @@ public class Slide {
     @Column(nullable = false, length = 100)
     private String filename;
 
-    /** ID del archivo en Google Drive si el origen fue DRIVE; null si fue UPLOAD. */
+    /**
+     * ID del archivo en Google Drive si el origen fue DRIVE; null si fue UPLOAD.
+     */
     @Column(name = "drive_file_id", length = 200)
     private String driveFileId;
 
@@ -49,28 +52,64 @@ public class Slide {
 
     // ── Constructores ─────────────────────────────────────────────────────────
 
-    public Slide() {}
+    public Slide() {
+    }
 
     // ── Getters y setters ─────────────────────────────────────────────────────
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public String getId() {
+        return id;
+    }
 
-    public Presentation getPresentation() { return presentation; }
-    public void setPresentation(Presentation presentation) { this.presentation = presentation; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public int getNumber() { return number; }
-    public void setNumber(int number) { this.number = number; }
+    public Presentation getPresentation() {
+        return presentation;
+    }
 
-    public String getFilename() { return filename; }
-    public void setFilename(String filename) { this.filename = filename; }
+    public void setPresentation(Presentation presentation) {
+        this.presentation = presentation;
+    }
 
-    public String getDriveFileId() { return driveFileId; }
-    public void setDriveFileId(String driveFileId) { this.driveFileId = driveFileId; }
+    public int getNumber() {
+        return number;
+    }
 
-    public String getS3Url() { return s3Url; }
-    public void setS3Url(String s3Url) { this.s3Url = s3Url; }
+    public void setNumber(int number) {
+        this.number = number;
+    }
 
-    public LocalDateTime getUploadedAt() { return uploadedAt; }
-    public void setUploadedAt(LocalDateTime uploadedAt) { this.uploadedAt = uploadedAt; }
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
+    public String getDriveFileId() {
+        return driveFileId;
+    }
+
+    public void setDriveFileId(String driveFileId) {
+        this.driveFileId = driveFileId;
+    }
+
+    public String getS3Url() {
+        return s3Url;
+    }
+
+    public void setS3Url(String s3Url) {
+        this.s3Url = s3Url;
+    }
+
+    public LocalDateTime getUploadedAt() {
+        return uploadedAt;
+    }
+
+    public void setUploadedAt(LocalDateTime uploadedAt) {
+        this.uploadedAt = uploadedAt;
+    }
 }

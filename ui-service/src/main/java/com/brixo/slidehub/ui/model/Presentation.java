@@ -76,43 +76,104 @@ public class Presentation {
 
     // ── Constructores ─────────────────────────────────────────────────────────
 
-    public Presentation() {}
+    public Presentation() {
+    }
 
     // ── Getters y setters ─────────────────────────────────────────────────────
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public String getId() {
+        return id;
+    }
 
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public User getUser() {
+        return user;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public void setUser(User user) {
+        this.user = user;
+    }
 
-    public SourceType getSourceType() { return sourceType; }
-    public void setSourceType(SourceType sourceType) { this.sourceType = sourceType; }
+    public String getName() {
+        return name;
+    }
 
-    public String getDriveFolderId() { return driveFolderId; }
-    public void setDriveFolderId(String driveFolderId) { this.driveFolderId = driveFolderId; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getDriveFolderName() { return driveFolderName; }
-    public void setDriveFolderName(String driveFolderName) { this.driveFolderName = driveFolderName; }
+    public String getDescription() {
+        return description;
+    }
 
-    public String getRepoUrl() { return repoUrl; }
-    public void setRepoUrl(String repoUrl) { this.repoUrl = repoUrl; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public List<Slide> getSlides() { return slides; }
-    public void setSlides(List<Slide> slides) { this.slides = slides; }
+    public SourceType getSourceType() {
+        return sourceType;
+    }
 
-    public List<QuickLink> getQuickLinks() { return quickLinks; }
-    public void setQuickLinks(List<QuickLink> quickLinks) { this.quickLinks = quickLinks; }
+    public void setSourceType(SourceType sourceType) {
+        this.sourceType = sourceType;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public String getDriveFolderId() {
+        return driveFolderId;
+    }
 
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public void setDriveFolderId(String driveFolderId) {
+        this.driveFolderId = driveFolderId;
+    }
+
+    public String getDriveFolderName() {
+        return driveFolderName;
+    }
+
+    public void setDriveFolderName(String driveFolderName) {
+        this.driveFolderName = driveFolderName;
+    }
+
+    public String getRepoUrl() {
+        return repoUrl;
+    }
+
+    public void setRepoUrl(String repoUrl) {
+        this.repoUrl = repoUrl;
+    }
+
+    public List<Slide> getSlides() {
+        return slides;
+    }
+
+    public void setSlides(List<Slide> slides) {
+        this.slides = slides;
+    }
+
+    public List<QuickLink> getQuickLinks() {
+        return quickLinks;
+    }
+
+    public void setQuickLinks(List<QuickLink> quickLinks) {
+        this.quickLinks = quickLinks;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

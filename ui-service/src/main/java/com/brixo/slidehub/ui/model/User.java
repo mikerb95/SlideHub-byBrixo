@@ -69,7 +69,9 @@ public class User {
 
     // ── Preferencias ──────────────────────────────────────────────────────────
 
-    /** Última carpeta de Google Drive seleccionada (para pre-selección en la UI). */
+    /**
+     * Última carpeta de Google Drive seleccionada (para pre-selección en la UI).
+     */
     @Column(name = "default_drive_folder_id", length = 200)
     private String defaultDriveFolderId;
 
@@ -190,8 +192,13 @@ public class User {
         this.googleRefreshToken = googleRefreshToken;
     }
 
-    public String getDefaultDriveFolderId() { return defaultDriveFolderId; }
-    public void setDefaultDriveFolderId(String defaultDriveFolderId) { this.defaultDriveFolderId = defaultDriveFolderId; }
+    public String getDefaultDriveFolderId() {
+        return defaultDriveFolderId;
+    }
+
+    public void setDefaultDriveFolderId(String defaultDriveFolderId) {
+        this.defaultDriveFolderId = defaultDriveFolderId;
+    }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;

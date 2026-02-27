@@ -20,13 +20,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Lógica de negocio para importar y listar presentaciones (PLAN-EXPANSION.md Fase 2).
+ * Lógica de negocio para importar y listar presentaciones (PLAN-EXPANSION.md
+ * Fase 2).
  *
  * Flujos soportados:
- *  - Importación desde Google Drive: descarga imágenes y las sube a S3.
- *  - Upload manual: recibe MultipartFile[], los sube directamente a S3.
+ * - Importación desde Google Drive: descarga imágenes y las sube a S3.
+ * - Upload manual: recibe MultipartFile[], los sube directamente a S3.
  *
- * En ambos casos las imágenes van a S3; el filesystem local de Render nunca se usa.
+ * En ambos casos las imágenes van a S3; el filesystem local de Render nunca se
+ * usa.
  */
 @Service
 public class PresentationService {
@@ -38,8 +40,8 @@ public class PresentationService {
     private final SlideUploadService slideUploadService;
 
     public PresentationService(PresentationRepository presentationRepository,
-                                GoogleDriveService googleDriveService,
-                                SlideUploadService slideUploadService) {
+            GoogleDriveService googleDriveService,
+            SlideUploadService slideUploadService) {
         this.presentationRepository = presentationRepository;
         this.googleDriveService = googleDriveService;
         this.slideUploadService = slideUploadService;
@@ -48,7 +50,8 @@ public class PresentationService {
     // ── Listado de presentaciones ─────────────────────────────────────────────
 
     /**
-     * Lista todas las presentaciones de un usuario, ordenadas por fecha de creación desc.
+     * Lista todas las presentaciones de un usuario, ordenadas por fecha de creación
+     * desc.
      */
     public List<Presentation> listPresentations(String userId) {
         return presentationRepository.findByUserIdOrderByCreatedAtDesc(userId);
@@ -94,18 +97,19 @@ public class PresentationService {
      * @param description       descripción (puede ser null)
      * @param driveFolderId     ID de la carpeta de Drive
      * @param driveFolderName   nombre de la carpeta (solo para mostrar en UI)
-     * @param repoUrl           URL del repositorio GitHub (puede ser null, usada en Fase 3)
+     * @param repoUrl           URL del repositorio GitHub (puede ser null, usada en
+     *                          Fase 3)
      * @param googleAccessToken token OAuth2 de Google del usuario
      * @return presentación creada con todos sus slides
      */
     @Transactional
     public Presentation createFromDrive(User user,
-                                        String name,
-                                        String description,
-                                        String driveFolderId,
-                                        String driveFolderName,
-                                        String repoUrl,
-                                        String googleAccessToken) {
+            String name,
+            String description,
+            String driveFolderId,
+            String driveFolderName,
+            String repoUrl,
+            String googleAccessToken) {
         List<DriveFile> images = googleDriveService.listImagesInFolder(driveFolderId, googleAccessToken);
         if (images.isEmpty()) {
             throw new IllegalArgumentException(
@@ -144,7 +148,8 @@ public class PresentationService {
      * Crea una presentación a partir de archivos subidos manualmente.
      *
      * Los archivos se ordenan por nombre antes de asignarles número de slide.
-     * Cada archivo se sube a S3 con la clave {@code slides/{presentationId}/{n}.png}.
+     * Cada archivo se sube a S3 con la clave
+     * {@code slides/{presentationId}/{n}.png}.
      *
      * @param user        usuario propietario
      * @param name        nombre de la presentación
@@ -155,10 +160,10 @@ public class PresentationService {
      */
     @Transactional
     public Presentation createFromUpload(User user,
-                                         String name,
-                                         String description,
-                                         String repoUrl,
-                                         List<MultipartFile> files) {
+            String name,
+            String description,
+            String repoUrl,
+            List<MultipartFile> files) {
         if (files == null || files.isEmpty()) {
             throw new IllegalArgumentException("Se requiere al menos un archivo para crear la presentación.");
         }
@@ -189,7 +194,8 @@ public class PresentationService {
             }
 
             String originalFilename = file.getOriginalFilename() != null
-                    ? file.getOriginalFilename() : slideNumber + ".png";
+                    ? file.getOriginalFilename()
+                    : slideNumber + ".png";
             String contentType = file.getContentType() != null ? file.getContentType() : "image/png";
             String s3Key = "slides/%s/%d.png".formatted(presentation.getId(), slideNumber);
             String s3Url = slideUploadService.upload(s3Key, imageBytes, contentType);
@@ -207,12 +213,12 @@ public class PresentationService {
     // ── Helpers privados ──────────────────────────────────────────────────────
 
     private Presentation buildPresentation(User user,
-                                            String name,
-                                            String description,
-                                            String repoUrl,
-                                            SourceType sourceType,
-                                            String driveFolderId,
-                                            String driveFolderName) {
+            String name,
+            String description,
+            String repoUrl,
+            SourceType sourceType,
+            String driveFolderId,
+            String driveFolderName) {
         Presentation p = new Presentation();
         p.setId(UUID.randomUUID().toString());
         p.setUser(user);
@@ -229,10 +235,10 @@ public class PresentationService {
     }
 
     private Slide buildSlide(Presentation presentation,
-                              int number,
-                              String filename,
-                              String driveFileId,
-                              String s3Url) {
+            int number,
+            String filename,
+            String driveFileId,
+            String s3Url) {
         Slide slide = new Slide();
         slide.setId(UUID.randomUUID().toString());
         slide.setPresentation(presentation);
@@ -244,14 +250,17 @@ public class PresentationService {
         return slide;
     }
 
-    /** Determina el content-type para S3 basado en el MIME type reportado por Drive. */
+    /**
+     * Determina el content-type para S3 basado en el MIME type reportado por Drive.
+     */
     private String resolveContentType(String mimeType) {
-        if (mimeType == null) return "image/png";
+        if (mimeType == null)
+            return "image/png";
         return switch (mimeType) {
             case "image/jpeg" -> "image/jpeg";
-            case "image/gif"  -> "image/gif";
+            case "image/gif" -> "image/gif";
             case "image/webp" -> "image/webp";
-            default           -> "image/png";
+            default -> "image/png";
         };
     }
 }

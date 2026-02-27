@@ -14,8 +14,7 @@ public record PresentationSummary(
         String description,
         String sourceType,
         int totalSlides,
-        LocalDateTime createdAt
-) {
+        LocalDateTime createdAt) {
     public static PresentationSummary from(Presentation p) {
         return new PresentationSummary(
                 p.getId(),
@@ -23,7 +22,6 @@ public record PresentationSummary(
                 p.getDescription(),
                 p.getSourceType().name(),
                 p.getSlides().size(),
-                p.getCreatedAt()
-        );
+                p.getCreatedAt());
     }
 }

@@ -29,11 +29,12 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Controller de importación y gestión de presentaciones (PLAN-EXPANSION.md Fase 2).
+ * Controller de importación y gestión de presentaciones (PLAN-EXPANSION.md Fase
+ * 2).
  *
  * Expone dos grupos de endpoints:
- *  - MVC: /presentations/** → vistas Thymeleaf para el panel de control
- *  - REST: /api/presentations/** → JSON consumido por fetch() en el frontend
+ * - MVC: /presentations/** → vistas Thymeleaf para el panel de control
+ * - REST: /api/presentations/** → JSON consumido por fetch() en el frontend
  *
  * El acceso a todos estos endpoints requiere rol PRESENTER o ADMIN
  * (configurado en SecurityConfig).
@@ -48,8 +49,8 @@ public class PresentationImportController {
     private final OAuth2AuthorizedClientService authorizedClientService;
 
     public PresentationImportController(PresentationService presentationService,
-                                         UserRepository userRepository,
-                                         OAuth2AuthorizedClientService authorizedClientService) {
+            UserRepository userRepository,
+            OAuth2AuthorizedClientService authorizedClientService) {
         this.presentationService = presentationService;
         this.userRepository = userRepository;
         this.authorizedClientService = authorizedClientService;
@@ -59,7 +60,8 @@ public class PresentationImportController {
 
     /**
      * Vista principal de importación de presentaciones.
-     * Carga la lista de presentaciones del usuario para mostrarla en la misma página.
+     * Carga la lista de presentaciones del usuario para mostrarla en la misma
+     * página.
      */
     @GetMapping("/presentations/import")
     public String importPage(Authentication authentication, Model model) {
@@ -93,7 +95,8 @@ public class PresentationImportController {
 
     /**
      * Lista las carpetas de Google Drive del usuario.
-     * Requiere que el usuario haya iniciado sesión con Google (token OAuth2 disponible).
+     * Requiere que el usuario haya iniciado sesión con Google (token OAuth2
+     * disponible).
      */
     @GetMapping("/api/presentations/drive/folders")
     @ResponseBody
@@ -113,7 +116,7 @@ public class PresentationImportController {
     @GetMapping("/api/presentations/drive/folders/{folderId}/images")
     @ResponseBody
     public ResponseEntity<?> listDriveImages(@PathVariable String folderId,
-                                              Authentication authentication) {
+            Authentication authentication) {
         String accessToken = resolveGoogleAccessToken(authentication);
         if (accessToken == null) {
             return ResponseEntity.status(401)
@@ -126,11 +129,11 @@ public class PresentationImportController {
     /**
      * Crea una presentación importando imágenes desde Google Drive.
      *
-     * @param name           nombre de la presentación
-     * @param description    descripción (opcional)
-     * @param driveFolderId  ID de la carpeta de Drive
+     * @param name            nombre de la presentación
+     * @param description     descripción (opcional)
+     * @param driveFolderId   ID de la carpeta de Drive
      * @param driveFolderName nombre de la carpeta (solo para mostrar)
-     * @param repoUrl        URL del repositorio GitHub (opcional, para Fase 3)
+     * @param repoUrl         URL del repositorio GitHub (opcional, para Fase 3)
      */
     @PostMapping("/api/presentations/create-from-drive")
     @ResponseBody
@@ -155,8 +158,7 @@ public class PresentationImportController {
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "presentationId", presentation.getId(),
-                    "totalSlides", presentation.getSlides().size()
-            ));
+                    "totalSlides", presentation.getSlides().size()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
@@ -190,8 +192,7 @@ public class PresentationImportController {
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "presentationId", presentation.getId(),
-                    "totalSlides", presentation.getSlides().size()
-            ));
+                    "totalSlides", presentation.getSlides().size()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
@@ -210,8 +211,7 @@ public class PresentationImportController {
     private User resolveUser(Authentication authentication) {
         String identifier = authentication.getName();
         Optional<User> user = userRepository.findByEmail(identifier);
-        return user.orElseThrow(() ->
-                new IllegalStateException("Usuario autenticado no encontrado: " + identifier));
+        return user.orElseThrow(() -> new IllegalStateException("Usuario autenticado no encontrado: " + identifier));
     }
 
     /**
@@ -234,7 +234,8 @@ public class PresentationImportController {
     }
 
     /**
-     * Indica si el usuario tiene un token de Google activo (para condicionar la UI).
+     * Indica si el usuario tiene un token de Google activo (para condicionar la
+     * UI).
      */
     private boolean hasGoogleToken(Authentication authentication) {
         return resolveGoogleAccessToken(authentication) != null;

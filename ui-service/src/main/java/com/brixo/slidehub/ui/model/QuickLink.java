@@ -9,9 +9,11 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 /**
- * Enlace rápido asociado a una presentación (PLAN-EXPANSION.md Fase 2 tarea 20 / Fase 4).
+ * Enlace rápido asociado a una presentación (PLAN-EXPANSION.md Fase 2 tarea 20
+ * / Fase 4).
  *
- * Se muestra en el main-panel como acceso directo a demos, recursos externos, etc.
+ * Se muestra en el main-panel como acceso directo a demos, recursos externos,
+ * etc.
  * Estructura: icono (Font Awesome) + título + URL + descripción opcional.
  */
 @Entity
@@ -45,28 +47,64 @@ public class QuickLink {
 
     // ── Constructores ─────────────────────────────────────────────────────────
 
-    public QuickLink() {}
+    public QuickLink() {
+    }
 
     // ── Getters y setters ─────────────────────────────────────────────────────
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public String getId() {
+        return id;
+    }
 
-    public Presentation getPresentation() { return presentation; }
-    public void setPresentation(Presentation presentation) { this.presentation = presentation; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public Presentation getPresentation() {
+        return presentation;
+    }
 
-    public String getUrl() { return url; }
-    public void setUrl(String url) { this.url = url; }
+    public void setPresentation(Presentation presentation) {
+        this.presentation = presentation;
+    }
 
-    public String getIcon() { return icon; }
-    public void setIcon(String icon) { this.icon = icon; }
+    public String getTitle() {
+        return title;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-    public int getDisplayOrder() { return displayOrder; }
-    public void setDisplayOrder(int displayOrder) { this.displayOrder = displayOrder; }
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public int getDisplayOrder() {
+        return displayOrder;
+    }
+
+    public void setDisplayOrder(int displayOrder) {
+        this.displayOrder = displayOrder;
+    }
 }

@@ -53,11 +53,13 @@ public class GoogleDriveService {
                     .bodyToMono(Map.class)
                     .block();
 
-            if (response == null) return Collections.emptyList();
+            if (response == null)
+                return Collections.emptyList();
 
             @SuppressWarnings("unchecked")
             List<Map<String, String>> files = (List<Map<String, String>>) response.get("files");
-            if (files == null) return Collections.emptyList();
+            if (files == null)
+                return Collections.emptyList();
 
             return files.stream()
                     .map(f -> new DriveFolder(f.get("id"), f.get("name")))
@@ -92,11 +94,13 @@ public class GoogleDriveService {
                     .bodyToMono(Map.class)
                     .block();
 
-            if (response == null) return Collections.emptyList();
+            if (response == null)
+                return Collections.emptyList();
 
             @SuppressWarnings("unchecked")
             List<Map<String, String>> files = (List<Map<String, String>>) response.get("files");
-            if (files == null) return Collections.emptyList();
+            if (files == null)
+                return Collections.emptyList();
 
             return files.stream()
                     .map(f -> new DriveFile(f.get("id"), f.get("name"), f.get("mimeType")))
