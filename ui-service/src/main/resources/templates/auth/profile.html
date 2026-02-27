@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
 
 <head>
     <meta charset="UTF-8">
@@ -137,12 +136,10 @@
                     <i class="fa-brands fa-github fa-lg"></i>
                     GitHub
                     <small class="text-secondary" th:if="${githubLinked}"
-                           th:text="'@' + ${user?.githubUsername}">@usuario</small>
+                        th:text="'@' + ${user?.githubUsername}">@usuario</small>
                 </span>
                 <span th:if="${githubLinked}" class="badge-linked">Vinculado</span>
-                <a th:unless="${githubLinked}"
-                   href="/oauth2/authorization/github"
-                   class="btn-link-oauth">Vincular</a>
+                <a th:unless="${githubLinked}" href="/oauth2/authorization/github" class="btn-link-oauth">Vincular</a>
             </div>
 
             <!-- Google -->
@@ -151,12 +148,10 @@
                     <i class="fa-brands fa-google fa-lg"></i>
                     Google
                     <small class="text-secondary" th:if="${googleLinked}"
-                           th:text="${user?.googleEmail}">correo@gmail.com</small>
+                        th:text="${user?.googleEmail}">correo@gmail.com</small>
                 </span>
                 <span th:if="${googleLinked}" class="badge-linked">Vinculado</span>
-                <a th:unless="${googleLinked}"
-                   href="/oauth2/authorization/google"
-                   class="btn-link-oauth">Vincular</a>
+                <a th:unless="${googleLinked}" href="/oauth2/authorization/google" class="btn-link-oauth">Vincular</a>
             </div>
         </div>
 
