@@ -1,0 +1,12 @@
+com/brixo/slidehub/state/StateServiceApplication.class
+com/brixo/slidehub/state/model/SetDemoRequest.class
+com/brixo/slidehub/state/controller/DeviceController.class
+com/brixo/slidehub/state/controller/DemoController.class
+com/brixo/slidehub/state/model/Device.class
+com/brixo/slidehub/state/model/SetSlideRequest.class
+com/brixo/slidehub/state/service/SlideStateService.class
+com/brixo/slidehub/state/model/SlideStateResponse.class
+com/brixo/slidehub/state/model/DemoState.class
+com/brixo/slidehub/state/service/DeviceRegistryService.class
+com/brixo/slidehub/state/service/DemoStateService.class
+com/brixo/slidehub/state/controller/SlideController.class

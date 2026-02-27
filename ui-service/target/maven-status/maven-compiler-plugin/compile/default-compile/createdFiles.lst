@@ -1,0 +1,5 @@
+com/brixo/slidehub/ui/controller/PresenterViewController.class
+com/brixo/slidehub/ui/config/SecurityConfig.class
+com/brixo/slidehub/ui/UiServiceApplication.class
+com/brixo/slidehub/ui/controller/AuthController.class
+com/brixo/slidehub/ui/controller/PresentationViewController.class

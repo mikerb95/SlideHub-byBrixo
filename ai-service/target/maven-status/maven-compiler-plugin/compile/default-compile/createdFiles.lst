@@ -1,0 +1,4 @@
+com/brixo/slidehub/ai/controller/NotesController.class
+com/brixo/slidehub/ai/model/PresenterNote.class
+com/brixo/slidehub/ai/repository/PresenterNoteRepository.class
+com/brixo/slidehub/ai/AiServiceApplication.class

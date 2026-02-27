@@ -1,0 +1,4 @@
+/home/mike/dev/learning/SlideHub/ai-service/src/main/java/com/brixo/slidehub/ai/AiServiceApplication.java
+/home/mike/dev/learning/SlideHub/ai-service/src/main/java/com/brixo/slidehub/ai/controller/NotesController.java
+/home/mike/dev/learning/SlideHub/ai-service/src/main/java/com/brixo/slidehub/ai/model/PresenterNote.java
+/home/mike/dev/learning/SlideHub/ai-service/src/main/java/com/brixo/slidehub/ai/repository/PresenterNoteRepository.java

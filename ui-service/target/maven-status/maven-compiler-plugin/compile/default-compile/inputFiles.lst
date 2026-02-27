@@ -1,0 +1,5 @@
+/home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/UiServiceApplication.java
+/home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/config/SecurityConfig.java
+/home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/controller/AuthController.java
+/home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/controller/PresentationViewController.java
+/home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/controller/PresenterViewController.java
