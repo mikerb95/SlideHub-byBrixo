@@ -1,2 +1,15 @@
 com/brixo/slidehub/ui/config/S3Config.class
+com/brixo/slidehub/ui/controller/PresenterViewController.class
+com/brixo/slidehub/ui/exception/UserAlreadyExistsException.class
+com/brixo/slidehub/ui/model/Role.class
+com/brixo/slidehub/ui/service/EmailService.class
+com/brixo/slidehub/ui/service/SlideUploadService.class
+com/brixo/slidehub/ui/model/User.class
+com/brixo/slidehub/ui/service/CustomUserDetailsService.class
+com/brixo/slidehub/ui/repository/UserRepository.class
+com/brixo/slidehub/ui/config/SecurityConfig.class
 com/brixo/slidehub/ui/UiServiceApplication.class
+com/brixo/slidehub/ui/controller/AuthController.class
+com/brixo/slidehub/ui/service/UserService.class
+com/brixo/slidehub/ui/controller/PresentationViewController.class
+com/brixo/slidehub/ui/service/CustomOAuth2UserService.class

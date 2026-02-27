@@ -76,7 +76,8 @@ public class SecurityConfig {
      * Inyección explícita para evitar la auto-configuración de Spring Security
      * que podría interferir con la coexistencia OAuth2 + form login.
      *
-     * Spring Security 6.x: DaoAuthenticationProvider requiere UserDetailsService en constructor.
+     * Spring Security 6.x: DaoAuthenticationProvider requiere UserDetailsService en
+     * constructor.
      */
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
