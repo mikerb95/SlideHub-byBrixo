@@ -75,11 +75,12 @@ public class SecurityConfig {
      * Provider que conecta Spring Security con CustomUserDetailsService + BCrypt.
      * Inyección explícita para evitar la auto-configuración de Spring Security
      * que podría interferir con la coexistencia OAuth2 + form login.
+     *
+     * Spring Security 6.x: DaoAuthenticationProvider requiere UserDetailsService en constructor.
      */
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
