@@ -67,6 +67,12 @@ public class User {
     @Column(name = "google_refresh_token", columnDefinition = "TEXT")
     private String googleRefreshToken;
 
+    // ── Preferencias ──────────────────────────────────────────────────────────
+
+    /** Última carpeta de Google Drive seleccionada (para pre-selección en la UI). */
+    @Column(name = "default_drive_folder_id", length = 200)
+    private String defaultDriveFolderId;
+
     // ── Auditoría ─────────────────────────────────────────────────────────────
 
     @Column(name = "created_at", nullable = false)
@@ -183,6 +189,9 @@ public class User {
     public void setGoogleRefreshToken(String googleRefreshToken) {
         this.googleRefreshToken = googleRefreshToken;
     }
+
+    public String getDefaultDriveFolderId() { return defaultDriveFolderId; }
+    public void setDefaultDriveFolderId(String defaultDriveFolderId) { this.defaultDriveFolderId = defaultDriveFolderId; }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;

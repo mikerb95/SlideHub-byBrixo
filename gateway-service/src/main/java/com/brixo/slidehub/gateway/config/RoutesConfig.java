@@ -72,7 +72,8 @@ public class RoutesConfig {
                                 .or(RequestPredicates.path("/presenter"))
                                 .or(RequestPredicates.path("/main-panel"))
                                 .or(RequestPredicates.path("/demo"))
-                                .or(RequestPredicates.path("/showcase")),
+                                .or(RequestPredicates.path("/showcase"))
+                                .or(RequestPredicates.path("/presentations/**")),  // Fase 2
                         http())
                 .filter(uri(uiServiceUrl))
                 .build();

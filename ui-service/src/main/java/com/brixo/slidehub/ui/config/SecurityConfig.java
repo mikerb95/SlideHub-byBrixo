@@ -41,6 +41,9 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**", "/oauth2/**", "/login/oauth2/**").permitAll()
                         // Assets estáticos de slides
                         .requestMatchers("/presentation/**").permitAll()
+                        // Importación y gestión de presentaciones — requiere PRESENTER o ADMIN
+                        .requestMatchers("/presentations/**").hasAnyRole("PRESENTER", "ADMIN")
+                        .requestMatchers("/api/presentations/**").hasAnyRole("PRESENTER", "ADMIN")
                         // Polling de dispositivos (pasa por gateway, llega como /api/**)
                         .requestMatchers("/api/**").permitAll()
                         // Recursos estáticos (CSS, JS, imágenes)
