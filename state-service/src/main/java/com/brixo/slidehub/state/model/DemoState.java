@@ -1,8 +1,10 @@
 package com.brixo.slidehub.state.model;
 
 /**
- * Estado del modo demo — puede ser "slides" (con slide activo) o "url" (con iframe URL).
- * El campo returnSlide se usa en Fase 4 para volver al slide previo tras un demo.
+ * Estado del modo demo — puede ser "slides" (con slide activo) o "url" (con
+ * iframe URL).
+ * El campo returnSlide se usa en Fase 4 para volver al slide previo tras un
+ * demo.
  */
 public record DemoState(String mode, Integer slide, String url, Integer returnSlide) {
 
