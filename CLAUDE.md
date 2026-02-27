@@ -13,9 +13,13 @@ Es la reescritura de un módulo PHP/CodeIgniter 4 documentado en
 
 **Stack actual:**
 - Spring Boot 4.0.3 / Spring Cloud 2025.1.0 / Java 21
-- Maven multi-módulo (estructura a construir — el `pom.xml` raíz existe pero los submódulos aún no)
+- Maven multi-módulo (4 servicios creados en Fase 0)
 - Redis (estado en memoria), MongoDB (notas IA), Thymeleaf (UI), Spring Security (auth), Spring Cloud Gateway (enrutamiento)
 - 4 microservicios: `state-service` (8081), `ui-service` (8082), `ai-service` (8083), `gateway-service` (8080)
+- **Despliegue:** Render (un Web Service por microservicio)
+- **Emails:** Resend API vía HTTP (`WebClient`) — sin JavaMail ni SDKs
+- **Assets de usuario:** Amazon S3 (AWS SDK v2)
+- **PostgreSQL:** Aiven — DSN leído de `DATABASE_URL`
 
 ---
 
@@ -202,12 +206,15 @@ El `pom.xml` raíz debe tener `<packaging>pom</packaging>` y listar los módulos
 Cada submódulo hereda del parent y declara **solo las dependencias que necesita**.
 No copiar todas las dependencias del parent a cada hijo.
 
-| Servicio          | Dependencias clave                                                                      |
-|-------------------|-----------------------------------------------------------------------------------------|
-| `state-service`   | `web`, `data-redis`, `actuator`                                                         |
-| `ui-service`      | `web`, `thymeleaf`, `thymeleaf-extras-springsecurity6`, `security`, `webflux`, `actuator` |
-| `ai-service`      | `web`, `data-mongodb`, `webflux` (solo WebClient), `actuator`                           |
-| `gateway-service` | `spring-cloud-gateway-server-webmvc`, `config-server`, `actuator`                       |
+| Servicio          | Dependencias clave                                                                              |
+|-------------------|-------------------------------------------------------------------------------------------------|
+| `state-service`   | `web`, `data-redis`, `actuator`                                                                 |
+| `ui-service`      | `web`, `thymeleaf`, `thymeleaf-extras-springsecurity6`, `security`, `webflux`, `actuator`, `software.amazon.awssdk:s3` |
+| `ai-service`      | `web`, `data-mongodb`, `webflux` (solo WebClient), `actuator`                                   |
+| `gateway-service` | `spring-cloud-gateway-server-webmvc`, `config-server`, `actuator`                               |
+
+> **AWS SDK v2** (`software.amazon.awssdk:s3`) es una excepción justificada al patrón WebClient-only:
+> S3 requiere firma SigV4 que el SDK maneja automáticamente. Solo en `ui-service`.
 
 ---
 
@@ -231,6 +238,17 @@ slidehub.ai-service.url=${AI_SERVICE_URL:http://localhost:8083}
 slidehub.poll.slides.interval-ms=1000
 slidehub.poll.presenter.interval-ms=1500
 slidehub.poll.demo.interval-ms=800
+# Resend
+slidehub.resend.api-key=${RESEND_API_KEY}
+slidehub.resend.from=noreply@slidehub.app
+# AWS S3
+aws.s3.bucket=${AWS_S3_BUCKET}
+aws.s3.region=${AWS_REGION:us-east-1}
+aws.access-key-id=${AWS_ACCESS_KEY_ID}
+aws.secret-access-key=${AWS_SECRET_ACCESS_KEY}
+# PostgreSQL (Fase 1+)
+spring.datasource.url=${DATABASE_URL:jdbc:postgresql://localhost:5432/slidehub}
+spring.datasource.driver-class-name=org.postgresql.Driver
 
 # ai-service
 spring.application.name=ai-service
@@ -241,6 +259,9 @@ slidehub.ai.gemini.base-url=https://generativelanguage.googleapis.com
 slidehub.ai.groq.api-key=${GROQ_API_KEY}
 slidehub.ai.groq.base-url=https://api.groq.com
 slidehub.ai.groq.model=${GROQ_MODEL:llama3-8b-8192}
+# Resend (notificaciones de notas generadas si aplica)
+slidehub.resend.api-key=${RESEND_API_KEY}
+slidehub.resend.from=noreply@slidehub.app
 
 # gateway-service
 spring.application.name=gateway-service
@@ -418,6 +439,174 @@ try {
     log.error("Error generando nota con IA: {}", ex.getMessage());
     return ResponseEntity.ok(Map.of("success", false, "errorMessage", ex.getMessage()));
 }
+```
+
+---
+
+## 9.5 Infraestructura de Producción
+
+### 9.5.1 Resend (emails)
+
+- Responsable: `ui-service` (emails de auth) y `ai-service` (notificaciones IA si aplica)
+- **No usar:** JavaMail, Spring Mail, Resend SDK — solo HTTP vía `WebClient`
+- Endpoint: `POST https://api.resend.com/emails`
+- Autenticación: `Authorization: Bearer ${RESEND_API_KEY}`
+
+```java
+@Service
+public class EmailService {
+
+    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
+    private final WebClient resendClient;
+
+    @Value("${slidehub.resend.api-key}")
+    private String apiKey;
+
+    @Value("${slidehub.resend.from}")
+    private String fromAddress;
+
+    public EmailService() {
+        this.resendClient = WebClient.builder()
+                .baseUrl("https://api.resend.com")
+                .build();
+    }
+
+    public void send(String to, String subject, String html) {
+        resendClient.post()
+                .uri("/emails")
+                .header("Authorization", "Bearer " + apiKey)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(Map.of(
+                        "from", fromAddress,
+                        "to", List.of(to),
+                        "subject", subject,
+                        "html", html
+                ))
+                .retrieve()
+                .bodyToMono(Void.class)
+                .doOnError(e -> log.error("Error enviando email a {}: {}", to, e.getMessage()))
+                .block();
+    }
+}
+```
+
+### 9.5.2 Amazon S3 (assets de usuario)
+
+- Responsable: `ui-service` maneja los uploads y genera URLs públicas
+- **Usar:** AWS SDK v2 (`software.amazon.awssdk:s3`) — única excepción al patrón WebClient-only
+- Los archivos subidos en Render (filesystem efímero) van **siempre a S3**, nunca al disco local
+- Variables requeridas: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_S3_BUCKET`, `AWS_REGION`
+
+```java
+@Configuration
+public class S3Config {
+
+    @Bean
+    public S3Client s3Client(
+            @Value("${aws.s3.region}") String region,
+            @Value("${aws.access-key-id}") String accessKeyId,
+            @Value("${aws.secret-access-key}") String secretKey) {
+        return S3Client.builder()
+                .region(Region.of(region))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKeyId, secretKey)))
+                .build();
+    }
+}
+
+// En el servicio de uploads:
+@Service
+public class SlideUploadService {
+
+    private static final Logger log = LoggerFactory.getLogger(SlideUploadService.class);
+    private final S3Client s3;
+
+    @Value("${aws.s3.bucket}")
+    private String bucket;
+
+    @Value("${aws.s3.region}")
+    private String region;
+
+    public SlideUploadService(S3Client s3) {
+        this.s3 = s3;
+    }
+
+    public String upload(String key, byte[] data, String contentType) {
+        s3.putObject(
+                PutObjectRequest.builder()
+                        .bucket(bucket)
+                        .key(key)
+                        .contentType(contentType)
+                        .build(),
+                RequestBody.fromBytes(data)
+        );
+        return "https://%s.s3.%s.amazonaws.com/%s".formatted(bucket, region, key);
+    }
+}
+```
+
+### 9.5.3 Aiven (PostgreSQL)
+
+- Aiven provee un DSN completo con SSL incluido
+- Leer siempre desde `DATABASE_URL` — no hardcodear host/puerto
+- SSL es **obligatorio** en Aiven; el DSN ya lo incluye (`?ssl=true&sslmode=require`)
+- Migraciones con Flyway o Liquibase — **nunca** `ddl-auto=create` en producción
+
+```properties
+# application-prod.properties (ui-service, Fase 1+)
+spring.datasource.url=${DATABASE_URL}
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.hibernate.ddl-auto=validate
+spring.flyway.enabled=true
+```
+
+```java
+// Dependencia en ui-service/pom.xml (Fase 1)
+// <dependency>
+//   <groupId>org.postgresql</groupId>
+//   <artifactId>postgresql</artifactId>
+// </dependency>
+// <dependency>
+//   <groupId>org.flywaydb</groupId>
+//   <artifactId>flyway-core</artifactId>
+// </dependency>
+```
+
+### 9.5.4 Despliegue en Render
+
+Cada microservicio es un **Web Service** en Render:
+
+| Servicio          | Build Command                           | Start Command                            |
+|-------------------|-----------------------------------------|------------------------------------------|
+| `gateway-service` | `./mvnw -pl gateway-service package -am` | `java -jar gateway-service/target/*.jar` |
+| `state-service`   | `./mvnw -pl state-service package -am`  | `java -jar state-service/target/*.jar`   |
+| `ui-service`      | `./mvnw -pl ui-service package -am`     | `java -jar ui-service/target/*.jar`      |
+| `ai-service`      | `./mvnw -pl ai-service package -am`     | `java -jar ai-service/target/*.jar`      |
+
+**Variables de entorno mínimas por servicio en Render:**
+```
+# Todas
+SPRING_PROFILES_ACTIVE=prod
+
+# state-service
+REDIS_HOST=<redis-internal-url>
+
+# ui-service
+STATE_SERVICE_URL=https://slidehub-state.onrender.com
+AI_SERVICE_URL=https://slidehub-ai.onrender.com
+RESEND_API_KEY=<key>
+AWS_ACCESS_KEY_ID=<key>
+AWS_SECRET_ACCESS_KEY=<key>
+AWS_S3_BUCKET=slidehub-assets
+AWS_REGION=us-east-1
+DATABASE_URL=<aiven-dsn>
+
+# ai-service
+MONGODB_URI=<atlas-uri>
+GEMINI_API_KEY=<key>
+GROQ_API_KEY=<key>
+RESEND_API_KEY=<key>
 ```
 
 ---
@@ -629,6 +818,11 @@ Usar estos términos de forma consistente en código, variables y comentarios:
 - No hardcodees API keys — siempre `${GEMINI_API_KEY}` y `${GROQ_API_KEY}` desde environment.
 - No almacenes notas de presentador en Redis — pertenecen a MongoDB en `ai-service`.
 - El `PresenterNote` usa `@Document` de Spring Data MongoDB, no `record` (necesita `@Id` y mutabilidad para upsert).
+- No uses Resend SDK, JavaMail ni Spring Mail — solo llamadas HTTP a `https://api.resend.com/emails`.
+- No hardcodees credenciales AWS ni el DSN de Aiven — siempre desde variables de entorno.
+- No guardes arhivos subidos por usuarios en el filesystem local de Render — todo va a S3.
+- No uses `ddl-auto=create` ni `ddl-auto=update` en producción con Aiven — solo `validate` + migraciones Flyway.
+- No configures CORS ni headers de trust por servicio individual — centralizar en `gateway-service`.
 
 ---
 

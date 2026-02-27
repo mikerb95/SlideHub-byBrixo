@@ -201,6 +201,10 @@ notas del presentador en MongoDB.
 | Testing           | JUnit 5, Spring Boot Test, MockMvc          | incluido en Boot             |
 | CSS (vistas)      | Bootstrap 5.3 + Tailwind CDN, Font Awesome 6.5 | CDN only                  |
 | JS (vistas)       | Vanilla ES6 (fetch API, DOM, polling)       | sin bundler                  |
+| Email             | Resend API                                  | llamadas HTTP vía WebClient  |
+| Storage (assets)  | Amazon S3                                   | AWS SDK v2 vía WebClient     |
+| PostgreSQL (prod) | Aiven                                       | DSN como variable de entorno |
+| Despliegue        | Render                                      | Web Services por microservicio |
 
 > **Regla:** No añadir Lombok, MapStruct ni ninguna librería de generación de código
 > sin discutirlo primero. Preferir código explícito y legible.
@@ -348,19 +352,22 @@ Secciones clave del doc de análisis por tarea:
 
 | # | Decisión                                   | Opciones                              |
 |---|---------------------------------------------|---------------------------------------|
-| 1 | Persistence backend para `state-service`    | Redis puro vs Redis + JPA (PostgreSQL) |
-| 2 | Gestión de assets (slides PNG)              | Directorio local vs S3-compatible     |
-| 3 | Módulo `showcase` vs ruta de `ui-service`  | ¿Servicio propio o endpoint de UI?    |
-| 4 | Multi-sesión (varias presentaciones)        | Fuera de alcance v1 — no implementar |
+| 1 | Módulo `showcase` vs ruta de `ui-service`  | ¿Servicio propio o endpoint de UI?    |
+| 2 | Multi-sesión (varias presentaciones)        | Fuera de alcance v1 — no implementar |
 
 **Decisiones ya tomadas (no reabrir):**
 
-| Decisión                        | Resolución                                                 |
-|---------------------------------|------------------------------------------------------------|
-| Autenticación                   | Spring Security + BCrypt + sesiones HTTP en `ui-service`   |
-| Roles                           | `PRESENTER` (control) y `ADMIN` (devices + control)        |
-| Store de notas IA               | MongoDB en `ai-service`                                    |
-| Integración Gemini y Groq       | HTTP puro vía `WebClient` — sin SDKs de terceros           |
+| Decisión                        | Resolución                                                                          |
+|---------------------------------|-------------------------------------------------------------------------------------|
+| Autenticación                   | Spring Security + BCrypt + sesiones HTTP en `ui-service`                            |
+| Roles                           | `PRESENTER` (control) y `ADMIN` (devices + control)                                 |
+| Store de notas IA               | MongoDB en `ai-service`                                                             |
+| Integración Gemini y Groq       | HTTP puro vía `WebClient` — sin SDKs de terceros                                    |
+| Despliegue                      | **Render** — un Web Service por microservicio                                       |
+| Envío de emails                 | **Resend API** — HTTP vía `WebClient`, sin librerías SMTP ni SDKs                  |
+| Almacenamiento de assets        | **Amazon S3** — uploads de usuarios (slides, imágenes) — AWS SDK v2                |
+| Base de datos PostgreSQL        | **Aiven** — DSN completo leído de variable de entorno `DATABASE_URL`               |
+| Persistence backend             | Redis (estado efímero) + PostgreSQL en Aiven (usuarios, presentaciones persistidas) |
 
 ---
 
@@ -401,6 +408,102 @@ Secciones clave del doc de análisis por tarea:
 - ❌ No tocar el `pom.xml` raíz sin entender que es el parent de un multi-módulo Maven
 - ❌ No almacenar notas del presentador en Redis — pertenecen a MongoDB en `ai-service`
 - ❌ No implementar multi-sesión (varias presentaciones en paralelo) — fuera de alcance v1
+- ❌ No usar Resend SDK oficial — integrar solo vía HTTP (`WebClient`) igual que Gemini/Groq
+- ❌ No hardcodear credenciales de AWS S3 ni Aiven — siempre leer de variables de entorno
+- ❌ No almacenar archivos de usuarios en el sistema de archivos local — todo a S3
+- ❌ No conectarse a una PostgreSQL fuera de Aiven en producción — usar `DATABASE_URL`
+- ❌ No configurar CORS, headers de trust ni IPs de Render manualmente por servicio; centralizar en `gateway-service`
+
+---
+
+## 12. Infraestructura de Despliegue
+
+### Render (plataforma de hosting)
+
+Cada microservicio es un **Web Service** independiente en Render:
+
+| Servicio         | Nombre en Render          | Build Command                              | Start Command                            |
+|------------------|---------------------------|--------------------------------------------|------------------------------------------|
+| `gateway-service`| `slidehub-gateway`        | `./mvnw -pl gateway-service package -am`  | `java -jar gateway-service/target/*.jar` |
+| `state-service`  | `slidehub-state`          | `./mvnw -pl state-service package -am`    | `java -jar state-service/target/*.jar`   |
+| `ui-service`     | `slidehub-ui`             | `./mvnw -pl ui-service package -am`       | `java -jar ui-service/target/*.jar`      |
+| `ai-service`     | `slidehub-ai`             | `./mvnw -pl ai-service package -am`       | `java -jar ai-service/target/*.jar`      |
+
+**Variables de entorno en Render (por servicio):**
+```
+# Globales (todos los servicios)
+SPRING_PROFILES_ACTIVE=prod
+
+# state-service
+REDIS_HOST=<redis-url>
+REDIS_PORT=6379
+
+# ui-service
+STATE_SERVICE_URL=https://slidehub-state.onrender.com
+AI_SERVICE_URL=https://slidehub-ai.onrender.com
+
+# ai-service
+MONGODB_URI=<mongodb-uri>
+GEMINI_API_KEY=<key>
+GROQ_API_KEY=<key>
+RESEND_API_KEY=<key>
+
+# Servicios con PostgreSQL (Fase 1)
+DATABASE_URL=<aiven-dsn>   # formato: jdbc:postgresql://host:port/dbname?ssl=...
+```
+
+> Los servicios en Render usan HTTPS automáticamente. No configurar SSL manual.
+
+### Resend (envío de emails)
+
+- **Uso:** verificación de correo en registro (Fase 1), notificaciones.
+- **Integración:** HTTP POST a `https://api.resend.com/emails` con `Authorization: Bearer ${RESEND_API_KEY}`
+- **No usar:** Resend SDK, JavaMail, Spring Mail — solo `WebClient`.
+- **Servicio responsable:** `ui-service` para emails de auth; `ai-service` para notificaciones de notas generadas si aplica.
+
+```java
+// Ejemplo de llamada a Resend vía WebClient
+webClient.post()
+    .uri("https://api.resend.com/emails")
+    .header("Authorization", "Bearer " + resendApiKey)
+    .contentType(MediaType.APPLICATION_JSON)
+    .bodyValue(Map.of(
+        "from", "noreply@slidehub.app",
+        "to", List.of(userEmail),
+        "subject", "Confirma tu cuenta",
+        "html", "<p>Tu código: " + code + "</p>"
+    ))
+    .retrieve()
+    .bodyToMono(Void.class)
+    .block();
+```
+
+### Amazon S3 (almacenamiento de assets)
+
+- **Uso:** slides PNG subidos por usuarios, portadas de presentaciones.
+- **Integración:** AWS SDK v2 (`software.amazon.awssdk:s3`) — es una excepción justificada al patrón WebClient-only porque S3 requiere firma SigV4.
+- **Servicio responsable:** `ui-service` maneja los uploads; las URLs públicas se devuelven al frontend.
+- **Variables requeridas:**
+  - `AWS_ACCESS_KEY_ID`
+  - `AWS_SECRET_ACCESS_KEY`
+  - `AWS_S3_BUCKET`
+  - `AWS_REGION` (p.ej. `us-east-1`)
+- **URL de objeto:** `https://${AWS_S3_BUCKET}.s3.${AWS_REGION}.amazonaws.com/<key>`
+- **No** almacenar archivos en el filesystem de Render — es efímero (se borra en cada deploy).
+
+### Aiven (PostgreSQL)
+
+- **Uso:** usuarios, sesiones persistidas, presentaciones (Fase 1+).
+- **DSN:** Aiven provee un DSN completo con SSL. Se lee de `DATABASE_URL`.
+- **SSL obligatorio:** Aiven requiere `sslmode=require` en la URL de conexión.
+- **Configuración en `application-prod.properties`:**
+  ```properties
+  spring.datasource.url=${DATABASE_URL}
+  spring.datasource.driver-class-name=org.postgresql.Driver
+  spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+  spring.jpa.hibernate.ddl-auto=validate
+  ```
+- **Migraciones:** Liquibase o Flyway — no usar `ddl-auto=create` en producción.
 
 ---
 
