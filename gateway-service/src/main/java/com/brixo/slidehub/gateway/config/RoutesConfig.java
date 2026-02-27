@@ -65,8 +65,8 @@ public class RoutesConfig {
         return route("ui-service-routes")
                 .route(
                         RequestPredicates.path("/auth/**")
-                                .or(RequestPredicates.path("/oauth2/**"))        // /oauth2/authorization/{provider}
-                                .or(RequestPredicates.path("/login/oauth2/**"))  // /login/oauth2/code/{provider}
+                                .or(RequestPredicates.path("/oauth2/**")) // /oauth2/authorization/{provider}
+                                .or(RequestPredicates.path("/login/oauth2/**")) // /login/oauth2/code/{provider}
                                 .or(RequestPredicates.path("/slides"))
                                 .or(RequestPredicates.path("/remote"))
                                 .or(RequestPredicates.path("/presenter"))
