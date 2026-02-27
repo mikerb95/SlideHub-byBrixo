@@ -2,7 +2,7 @@ package com.brixo.slidehub.state.service;
 
 import com.brixo.slidehub.state.model.DemoState;
 import com.brixo.slidehub.state.model.SetDemoRequest;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
