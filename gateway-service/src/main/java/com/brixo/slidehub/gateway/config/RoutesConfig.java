@@ -19,12 +19,12 @@ import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFuncti
  * Spring compone múltiples beans RouterFunction en orden por @Order.
  *
  * Tabla de rutas:
- *   /api/ai/**        → ai-service:8083   (Order 1)
- *   /api/**           → state-service:8081 (Order 2)
- *   /auth/**,
- *   /slides, /remote,
- *   /presenter, etc.  → ui-service:8082   (Order 3)
- *   /presentation/**  → ui-service:8082   (Order 4)
+ * /api/ai/** → ai-service:8083 (Order 1)
+ * /api/** → state-service:8081 (Order 2)
+ * /auth/**,
+ * /slides, /remote,
+ * /presenter, etc. → ui-service:8082 (Order 3)
+ * /presentation/** → ui-service:8082 (Order 4)
  */
 @Configuration
 public class RoutesConfig {
