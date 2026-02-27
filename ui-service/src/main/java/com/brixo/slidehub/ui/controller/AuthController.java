@@ -95,7 +95,8 @@ public class AuthController {
         try {
             userService.registerUser(username, email, password);
             model.addAttribute("successMessage",
-                    "¡Cuenta creada! Revisa tu email (" + email + ") para confirmar tu cuenta antes de iniciar sesión.");
+                    "¡Cuenta creada! Revisa tu email (" + email
+                            + ") para confirmar tu cuenta antes de iniciar sesión.");
             return "auth/register";
         } catch (UserAlreadyExistsException ex) {
             // Mensaje genérico para no revelar si fue el username o el email (seguridad)
@@ -156,10 +157,12 @@ public class AuthController {
     private String resolveUsername(Authentication authentication) {
         if (authentication.getPrincipal() instanceof OAuth2User oAuth2User) {
             // Para OAuth2, el atributo varía según el proveedor
-            Object login = oAuth2User.getAttribute("login");   // GitHub
-            Object email = oAuth2User.getAttribute("email");   // Google
-            if (login != null) return login.toString();
-            if (email != null) return email.toString();
+            Object login = oAuth2User.getAttribute("login"); // GitHub
+            Object email = oAuth2User.getAttribute("email"); // Google
+            if (login != null)
+                return login.toString();
+            if (email != null)
+                return email.toString();
         }
         return authentication.getName();
     }

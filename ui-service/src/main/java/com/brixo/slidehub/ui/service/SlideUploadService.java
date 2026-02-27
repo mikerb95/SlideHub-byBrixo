@@ -47,8 +47,7 @@ public class SlideUploadService {
                         .key(key)
                         .contentType(contentType)
                         .build(),
-                RequestBody.fromBytes(data)
-        );
+                RequestBody.fromBytes(data));
         String url = "https://%s.s3.%s.amazonaws.com/%s".formatted(bucket, region, key);
         log.info("Archivo subido a S3: {} ({})", key, contentType);
         return url;
@@ -64,8 +63,7 @@ public class SlideUploadService {
                 DeleteObjectRequest.builder()
                         .bucket(bucket)
                         .key(key)
-                        .build()
-        );
+                        .build());
         log.info("Archivo eliminado de S3: {}", key);
     }
 

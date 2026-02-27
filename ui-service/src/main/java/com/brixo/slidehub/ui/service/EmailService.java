@@ -13,7 +13,8 @@ import java.util.Map;
 /**
  * Servicio de email via Resend API (CLAUDE.md §9.5.1).
  *
- * Integración HTTP pura con WebClient — sin JavaMail, Spring Mail ni Resend SDK.
+ * Integración HTTP pura con WebClient — sin JavaMail, Spring Mail ni Resend
+ * SDK.
  * Endpoint: POST https://api.resend.com/emails
  */
 @Service
@@ -52,8 +53,7 @@ public class EmailService {
                             "from", fromAddress,
                             "to", List.of(to),
                             "subject", subject,
-                            "html", html
-                    ))
+                            "html", html))
                     .retrieve()
                     .bodyToMono(Void.class)
                     .doOnError(e -> log.error("Error enviando email a {}: {}", to, e.getMessage()))

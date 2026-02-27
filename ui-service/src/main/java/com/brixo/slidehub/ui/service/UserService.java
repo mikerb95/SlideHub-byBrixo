@@ -31,8 +31,8 @@ public class UserService {
     private String baseUrl;
 
     public UserService(UserRepository userRepository,
-                       PasswordEncoder passwordEncoder,
-                       EmailService emailService) {
+            PasswordEncoder passwordEncoder,
+            EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
@@ -75,7 +75,8 @@ public class UserService {
 
     /**
      * Verifica el email del usuario usando el token de confirmación.
-     * Devuelve el usuario si el token es válido; vacío si ya expiró o es incorrecto.
+     * Devuelve el usuario si el token es válido; vacío si ya expiró o es
+     * incorrecto.
      */
     @Transactional
     public Optional<User> verifyEmail(String token) {

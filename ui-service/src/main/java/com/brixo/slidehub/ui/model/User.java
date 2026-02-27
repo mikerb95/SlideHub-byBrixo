@@ -10,10 +10,12 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
 /**
- * Entidad JPA de usuario (AGENTS.md §6 HU-001/002/003, PLAN-EXPANSION.md Fase 1 tarea 7).
+ * Entidad JPA de usuario (AGENTS.md §6 HU-001/002/003, PLAN-EXPANSION.md Fase 1
+ * tarea 7).
  *
  * Soporta login local (BCrypt) y OAuth2 (GitHub + Google) de forma coexistente.
- * No usa record — necesita mutabilidad para JPA y el flujo de vinculación OAuth.
+ * No usa record — necesita mutabilidad para JPA y el flujo de vinculación
+ * OAuth.
  */
 @Entity
 @Table(name = "users")
@@ -78,47 +80,115 @@ public class User {
 
     // ── Getters y setters ─────────────────────────────────────────────────────
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public String getId() {
+        return id;
+    }
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public String getUsername() {
+        return username;
+    }
 
-    public String getPasswordHash() { return passwordHash; }
-    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-    public Role getRole() { return role; }
-    public void setRole(Role role) { this.role = role; }
+    public String getEmail() {
+        return email;
+    }
 
-    public boolean isEmailVerified() { return emailVerified; }
-    public void setEmailVerified(boolean emailVerified) { this.emailVerified = emailVerified; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-    public String getEmailVerificationToken() { return emailVerificationToken; }
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
+    }
+
+    public String getEmailVerificationToken() {
+        return emailVerificationToken;
+    }
+
     public void setEmailVerificationToken(String emailVerificationToken) {
         this.emailVerificationToken = emailVerificationToken;
     }
 
-    public String getGithubId() { return githubId; }
-    public void setGithubId(String githubId) { this.githubId = githubId; }
+    public String getGithubId() {
+        return githubId;
+    }
 
-    public String getGithubUsername() { return githubUsername; }
-    public void setGithubUsername(String githubUsername) { this.githubUsername = githubUsername; }
+    public void setGithubId(String githubId) {
+        this.githubId = githubId;
+    }
 
-    public String getGithubAccessToken() { return githubAccessToken; }
-    public void setGithubAccessToken(String githubAccessToken) { this.githubAccessToken = githubAccessToken; }
+    public String getGithubUsername() {
+        return githubUsername;
+    }
 
-    public String getGoogleId() { return googleId; }
-    public void setGoogleId(String googleId) { this.googleId = googleId; }
+    public void setGithubUsername(String githubUsername) {
+        this.githubUsername = githubUsername;
+    }
 
-    public String getGoogleEmail() { return googleEmail; }
-    public void setGoogleEmail(String googleEmail) { this.googleEmail = googleEmail; }
+    public String getGithubAccessToken() {
+        return githubAccessToken;
+    }
 
-    public String getGoogleRefreshToken() { return googleRefreshToken; }
-    public void setGoogleRefreshToken(String googleRefreshToken) { this.googleRefreshToken = googleRefreshToken; }
+    public void setGithubAccessToken(String githubAccessToken) {
+        this.githubAccessToken = githubAccessToken;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public String getGoogleId() {
+        return googleId;
+    }
+
+    public void setGoogleId(String googleId) {
+        this.googleId = googleId;
+    }
+
+    public String getGoogleEmail() {
+        return googleEmail;
+    }
+
+    public void setGoogleEmail(String googleEmail) {
+        this.googleEmail = googleEmail;
+    }
+
+    public String getGoogleRefreshToken() {
+        return googleRefreshToken;
+    }
+
+    public void setGoogleRefreshToken(String googleRefreshToken) {
+        this.googleRefreshToken = googleRefreshToken;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }

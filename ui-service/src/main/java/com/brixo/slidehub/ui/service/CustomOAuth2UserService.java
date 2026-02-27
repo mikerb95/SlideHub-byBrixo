@@ -62,8 +62,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             return new DefaultOAuth2User(
                     List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())),
                     oauth2User.getAttributes(),
-                    nameAttribute
-            );
+                    nameAttribute);
         } catch (OAuth2AuthenticationException ex) {
             throw ex;
         } catch (Exception ex) {
@@ -178,7 +177,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
      * Genera un username único: si 'base' ya está ocupado, prueba 'base_<prefix>N'.
      */
     private String resolveUniqueUsername(String base, String prefix) {
-        if (base == null || base.isBlank()) base = prefix + "_user";
+        if (base == null || base.isBlank())
+            base = prefix + "_user";
         String candidate = base;
         int attempt = 1;
         while (userRepository.findByUsername(candidate).isPresent()) {

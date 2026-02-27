@@ -11,8 +11,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * Adaptador entre Spring Security y la tabla de usuarios en PostgreSQL (CLAUDE.md §11).
- * Carga el usuario por username — Spring Security lo llama en el proceso de login local.
+ * Adaptador entre Spring Security y la tabla de usuarios en PostgreSQL
+ * (CLAUDE.md §11).
+ * Carga el usuario por username — Spring Security lo llama en el proceso de
+ * login local.
  */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -36,7 +38,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 passwordHash,
-                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
-        );
+                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())));
     }
 }

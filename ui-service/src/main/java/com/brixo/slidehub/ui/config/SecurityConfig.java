@@ -25,7 +25,7 @@ public class SecurityConfig {
     private final CustomOAuth2UserService oAuth2UserService;
 
     public SecurityConfig(CustomUserDetailsService userDetailsService,
-                          CustomOAuth2UserService oAuth2UserService) {
+            CustomOAuth2UserService oAuth2UserService) {
         this.userDetailsService = userDetailsService;
         this.oAuth2UserService = oAuth2UserService;
     }
