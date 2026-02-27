@@ -3,25 +3,28 @@ package com.brixo.slidehub.gateway.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.servlet.function.RequestPredicates;
 import org.springframework.web.servlet.function.RouterFunction;
-import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerResponse;
 
+import static org.springframework.cloud.gateway.server.mvc.filter.FilterFunctions.uri;
+import static org.springframework.cloud.gateway.server.mvc.handler.GatewayRouterFunctions.route;
 import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions.http;
 
 /**
  * Configuración de rutas del API Gateway (AGENTS.md §2.4).
  *
- * ORDEN IMPORTANTE: /api/ai/** DEBE ir ANTES que /api/** para que las rutas
- * de IA no sean capturadas por el state-service.
+ * ORDEN IMPORTANTE: /api/ai/** (Order=1) DEBE ir ANTES que /api/** (Order=2).
+ * Spring compone múltiples beans RouterFunction en orden por @Order.
  *
  * Tabla de rutas:
- * /api/ai/** → ai-service:8083
- * /api/** → state-service:8081
- * /auth/** → ui-service:8082
- * /slides, /remote, etc. → ui-service:8082
- * /presentation/** → ui-service:8082
+ *   /api/ai/**        → ai-service:8083   (Order 1)
+ *   /api/**           → state-service:8081 (Order 2)
+ *   /auth/**,
+ *   /slides, /remote,
+ *   /presenter, etc.  → ui-service:8082   (Order 3)
+ *   /presentation/**  → ui-service:8082   (Order 4)
  */
 @Configuration
 public class RoutesConfig {
@@ -35,28 +38,52 @@ public class RoutesConfig {
     @Value("${slidehub.ui-service.url:http://localhost:8082}")
     private String uiServiceUrl;
 
+    /** IA routes — DEBE evaluarse antes que /api/** (Order=1) */
     @Bean
-    public RouterFunction<ServerResponse> gatewayRoutes() {
-        return RouterFunctions.route()
-                // IA routes — DEBE ir antes que /api/**
-                .route(RequestPredicates.path("/api/ai/**"), http(aiServiceUrl))
-                // State routes
-                .route(RequestPredicates.path("/api/**"), http(stateServiceUrl))
-                // Auth routes
-                .route(RequestPredicates.path("/auth/**"), http(uiServiceUrl))
-                // OAuth2 routes (Fase 1)
-                .route(RequestPredicates.path("/login/oauth2/**"), http(uiServiceUrl))
-                // UI application routes
+    @Order(1)
+    public RouterFunction<ServerResponse> aiRoutes() {
+        return route("ai-service-routes")
+                .route(RequestPredicates.path("/api/ai/**"), http())
+                .filter(uri(aiServiceUrl))
+                .build();
+    }
+
+    /** State routes (Order=2) */
+    @Bean
+    @Order(2)
+    public RouterFunction<ServerResponse> stateRoutes() {
+        return route("state-service-routes")
+                .route(RequestPredicates.path("/api/**"), http())
+                .filter(uri(stateServiceUrl))
+                .build();
+    }
+
+    /** UI application routes + auth (Order=3) */
+    @Bean
+    @Order(3)
+    public RouterFunction<ServerResponse> uiRoutes() {
+        return route("ui-service-routes")
                 .route(
-                        RequestPredicates.path("/slides")
+                        RequestPredicates.path("/auth/**")
+                                .or(RequestPredicates.path("/login/oauth2/**"))
+                                .or(RequestPredicates.path("/slides"))
                                 .or(RequestPredicates.path("/remote"))
                                 .or(RequestPredicates.path("/presenter"))
                                 .or(RequestPredicates.path("/main-panel"))
                                 .or(RequestPredicates.path("/demo"))
                                 .or(RequestPredicates.path("/showcase")),
-                        http(uiServiceUrl))
-                // Presentation static assets (HU-013)
-                .route(RequestPredicates.path("/presentation/**"), http(uiServiceUrl))
+                        http())
+                .filter(uri(uiServiceUrl))
+                .build();
+    }
+
+    /** Presentation static assets (HU-013, Order=4) */
+    @Bean
+    @Order(4)
+    public RouterFunction<ServerResponse> presentationRoutes() {
+        return route("presentation-routes")
+                .route(RequestPredicates.path("/presentation/**"), http())
+                .filter(uri(uiServiceUrl))
                 .build();
     }
 }
