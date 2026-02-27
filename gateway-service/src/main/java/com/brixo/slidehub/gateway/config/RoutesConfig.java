@@ -58,14 +58,15 @@ public class RoutesConfig {
                 .build();
     }
 
-    /** UI application routes + auth (Order=3) */
+    /** UI application routes + auth + OAuth2 (Order=3) */
     @Bean
     @Order(3)
     public RouterFunction<ServerResponse> uiRoutes() {
         return route("ui-service-routes")
                 .route(
                         RequestPredicates.path("/auth/**")
-                                .or(RequestPredicates.path("/login/oauth2/**"))
+                                .or(RequestPredicates.path("/oauth2/**"))        // /oauth2/authorization/{provider}
+                                .or(RequestPredicates.path("/login/oauth2/**"))  // /login/oauth2/code/{provider}
                                 .or(RequestPredicates.path("/slides"))
                                 .or(RequestPredicates.path("/remote"))
                                 .or(RequestPredicates.path("/presenter"))
