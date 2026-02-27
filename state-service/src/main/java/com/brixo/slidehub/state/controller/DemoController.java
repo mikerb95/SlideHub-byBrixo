@@ -9,8 +9,9 @@ import org.springframework.web.bind.annotation.*;
 /**
  * API del modo demo — alterna entre slides e iframe de URL (HU-010, HU-011).
  *
- * GET  /api/demo  → { "mode": "slides|url", "slide": N, "url": "...", "returnSlide": N }
- * POST /api/demo  → actualiza el modo
+ * GET /api/demo → { "mode": "slides|url", "slide": N, "url": "...",
+ * "returnSlide": N }
+ * POST /api/demo → actualiza el modo
  */
 @RestController
 @RequestMapping("/api/demo")

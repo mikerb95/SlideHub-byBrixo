@@ -34,20 +34,17 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/slides/**").permitAll()
                         // Panel del presentador y main panel — requiere PRESENTER o ADMIN
                         .requestMatchers("/presenter", "/main-panel").hasAnyRole("PRESENTER", "ADMIN")
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/auth/login")
                         .loginProcessingUrl("/auth/login")
                         .defaultSuccessUrl("/presenter", true)
                         .failureUrl("/auth/login?error=true")
-                        .permitAll()
-                )
+                        .permitAll())
                 .logout(logout -> logout
                         .logoutUrl("/auth/logout")
                         .logoutSuccessUrl("/auth/login?logout=true")
-                        .invalidateHttpSession(true)
-                );
+                        .invalidateHttpSession(true));
         return http.build();
     }
 

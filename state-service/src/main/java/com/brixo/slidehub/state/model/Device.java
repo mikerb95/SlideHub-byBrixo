@@ -11,5 +11,5 @@ public record Device(
         String type,
         String token,
         String lastIp,
-        LocalDateTime lastConnection
-) {}
+        LocalDateTime lastConnection) {
+}

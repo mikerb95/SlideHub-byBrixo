@@ -38,7 +38,8 @@ public class NotesController {
 
     /**
      * Genera nota para un slide vía IA (HU-016).
-     * Fase 0: devuelve 501 Not Implemented — se implementará en Fase 2 con Gemini + Groq.
+     * Fase 0: devuelve 501 Not Implemented — se implementará en Fase 2 con Gemini +
+     * Groq.
      */
     @PostMapping("/generate")
     public ResponseEntity<Map<String, Object>> generate(@RequestBody Map<String, Object> request) {
@@ -63,7 +64,7 @@ public class NotesController {
      */
     @GetMapping("/{presentationId}/{slideNumber}")
     public ResponseEntity<PresenterNote> getNote(@PathVariable String presentationId,
-                                                  @PathVariable int slideNumber) {
+            @PathVariable int slideNumber) {
         return repository.findByPresentationIdAndSlideNumber(presentationId, slideNumber)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.noContent().build());

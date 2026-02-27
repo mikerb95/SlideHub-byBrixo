@@ -1,0 +1,12 @@
+/home/mike/dev/learning/SlideHub/state-service/src/main/java/com/brixo/slidehub/state/StateServiceApplication.java
+/home/mike/dev/learning/SlideHub/state-service/src/main/java/com/brixo/slidehub/state/controller/DemoController.java
+/home/mike/dev/learning/SlideHub/state-service/src/main/java/com/brixo/slidehub/state/controller/DeviceController.java
+/home/mike/dev/learning/SlideHub/state-service/src/main/java/com/brixo/slidehub/state/controller/SlideController.java
+/home/mike/dev/learning/SlideHub/state-service/src/main/java/com/brixo/slidehub/state/model/DemoState.java
+/home/mike/dev/learning/SlideHub/state-service/src/main/java/com/brixo/slidehub/state/model/Device.java
+/home/mike/dev/learning/SlideHub/state-service/src/main/java/com/brixo/slidehub/state/model/SetDemoRequest.java
+/home/mike/dev/learning/SlideHub/state-service/src/main/java/com/brixo/slidehub/state/model/SetSlideRequest.java
+/home/mike/dev/learning/SlideHub/state-service/src/main/java/com/brixo/slidehub/state/model/SlideStateResponse.java
+/home/mike/dev/learning/SlideHub/state-service/src/main/java/com/brixo/slidehub/state/service/DemoStateService.java
+/home/mike/dev/learning/SlideHub/state-service/src/main/java/com/brixo/slidehub/state/service/DeviceRegistryService.java
+/home/mike/dev/learning/SlideHub/state-service/src/main/java/com/brixo/slidehub/state/service/SlideStateService.java

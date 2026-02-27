@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.*;
 /**
  * API de navegación de slides (HU-004, HU-008).
  *
- * GET  /api/slide          → { "slide": N, "totalSlides": M }
- * POST /api/slide          → { "slide": N, "totalSlides": M }
+ * GET /api/slide → { "slide": N, "totalSlides": M }
+ * POST /api/slide → { "slide": N, "totalSlides": M }
  */
 @RestController
 @RequestMapping("/api/slide")
@@ -32,7 +32,8 @@ public class SlideController {
     }
 
     /**
-     * Actualiza el slide activo. Respeta los límites [1, totalSlides] (HU-004 §3,§4).
+     * Actualiza el slide activo. Respeta los límites [1, totalSlides] (HU-004
+     * §3,§4).
      */
     @PostMapping
     public ResponseEntity<SlideStateResponse> setSlide(@RequestBody SetSlideRequest request) {

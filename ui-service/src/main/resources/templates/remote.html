@@ -1,12 +1,18 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>SlideHub — Remote</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             background: #111;
             color: #fff;
@@ -19,16 +25,19 @@
             touch-action: pan-y;
             user-select: none;
         }
+
         #slide-indicator {
             font-size: 1.5rem;
             margin-bottom: 2rem;
             opacity: 0.7;
         }
+
         .controls {
             display: flex;
             gap: 3rem;
             align-items: center;
         }
+
         .btn-nav {
             background: #333;
             border: none;
@@ -44,8 +53,17 @@
             transition: background 0.15s;
             -webkit-tap-highlight-color: transparent;
         }
-        .btn-nav:active { background: #555; transform: scale(0.95); }
-        .btn-nav:disabled { opacity: 0.3; cursor: default; }
+
+        .btn-nav:active {
+            background: #555;
+            transform: scale(0.95);
+        }
+
+        .btn-nav:disabled {
+            opacity: 0.3;
+            cursor: default;
+        }
+
         #swipe-hint {
             margin-top: 3rem;
             opacity: 0.4;
@@ -53,6 +71,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="slide-indicator">Slide — / —</div>
     <div class="controls">
@@ -90,7 +109,7 @@
                 currentSlide = data.slide;
                 totalSlides = data.totalSlides;
                 updateUI();
-            } catch (_) {}
+            } catch (_) { }
         }
 
         async function navigate(delta) {
@@ -105,7 +124,7 @@
                 currentSlide = target;
                 updateUI();
                 if (navigator.vibrate) navigator.vibrate(30);
-            } catch (_) {}
+            } catch (_) { }
         }
 
         btnPrev.addEventListener('click', () => navigate(-1));
@@ -123,4 +142,5 @@
         setInterval(fetchState, POLL_INTERVAL_MS);
     </script>
 </body>
+
 </html>

@@ -10,13 +10,10 @@ import org.springframework.test.context.TestPropertySource;
 /**
  * Verifica que el contexto arranca sin necesidad de un MongoDB activo.
  */
-@SpringBootTest(
-        webEnvironment = WebEnvironment.MOCK,
-        excludeAutoConfiguration = {
-                MongoAutoConfiguration.class,
-                MongoDataAutoConfiguration.class
-        }
-)
+@SpringBootTest(webEnvironment = WebEnvironment.MOCK, excludeAutoConfiguration = {
+        MongoAutoConfiguration.class,
+        MongoDataAutoConfiguration.class
+})
 @TestPropertySource(properties = {
         "spring.data.mongodb.uri=mongodb://localhost:27017/slidehub-test",
         "slidehub.ai.gemini.api-key=test-key",

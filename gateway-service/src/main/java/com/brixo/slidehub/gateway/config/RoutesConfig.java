@@ -17,11 +17,11 @@ import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFuncti
  * de IA no sean capturadas por el state-service.
  *
  * Tabla de rutas:
- *   /api/ai/**              → ai-service:8083
- *   /api/**                 → state-service:8081
- *   /auth/**                → ui-service:8082
- *   /slides, /remote, etc.  → ui-service:8082
- *   /presentation/**        → ui-service:8082
+ * /api/ai/** → ai-service:8083
+ * /api/** → state-service:8081
+ * /auth/** → ui-service:8082
+ * /slides, /remote, etc. → ui-service:8082
+ * /presentation/** → ui-service:8082
  */
 @Configuration
 public class RoutesConfig {
@@ -54,8 +54,7 @@ public class RoutesConfig {
                                 .or(RequestPredicates.path("/main-panel"))
                                 .or(RequestPredicates.path("/demo"))
                                 .or(RequestPredicates.path("/showcase")),
-                        http(uiServiceUrl)
-                )
+                        http(uiServiceUrl))
                 // Presentation static assets (HU-013)
                 .route(RequestPredicates.path("/presentation/**"), http(uiServiceUrl))
                 .build();

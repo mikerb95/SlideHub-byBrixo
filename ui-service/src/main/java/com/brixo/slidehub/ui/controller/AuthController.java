@@ -23,9 +23,9 @@ public class AuthController {
      */
     @GetMapping("/login")
     public String loginPage(Authentication authentication,
-                            @RequestParam(required = false) String error,
-                            @RequestParam(required = false) String logout,
-                            Model model) {
+            @RequestParam(required = false) String error,
+            @RequestParam(required = false) String logout,
+            Model model) {
         if (authentication != null && authentication.isAuthenticated()) {
             return "redirect:/presenter";
         }

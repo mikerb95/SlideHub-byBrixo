@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 /**
  * Controller de vistas protegidas del presentador (HU-006, HU-007).
  *
- * Fase 0: sin llamadas a ai-service — notas del presentador se añadirán en Fase 2.
+ * Fase 0: sin llamadas a ai-service — notas del presentador se añadirán en Fase
+ * 2.
  */
 @Controller
 public class PresenterViewController {

@@ -6,9 +6,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 /**
- * Controller que sirve las vistas públicas de presentación (HU-005, HU-004, HU-010, HU-012).
+ * Controller que sirve las vistas públicas de presentación (HU-005, HU-004,
+ * HU-010, HU-012).
  *
- * No mantiene estado propio — todo el estado viene de state-service vía polling JS
+ * No mantiene estado propio — todo el estado viene de state-service vía polling
+ * JS
  * o llamadas WebClient en fases posteriores.
  */
 @Controller

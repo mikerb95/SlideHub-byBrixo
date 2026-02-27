@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SlideHub — Proyector</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             background: #000;
             width: 100vw;
@@ -15,25 +21,33 @@
             align-items: center;
             justify-content: center;
         }
+
         .slide-wrapper {
             position: relative;
             width: 100vw;
             height: 100vh;
         }
+
         .slide {
             position: absolute;
-            top: 0; left: 0;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             object-fit: contain;
             display: none;
         }
-        .slide.active { display: block; }
+
+        .slide.active {
+            display: block;
+        }
+
         #error-msg {
             display: none;
             position: fixed;
-            bottom: 1rem; right: 1rem;
-            background: rgba(255,0,0,0.7);
+            bottom: 1rem;
+            right: 1rem;
+            background: rgba(255, 0, 0, 0.7);
             color: white;
             padding: 0.5rem 1rem;
             border-radius: 4px;
@@ -41,6 +55,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="slide-wrapper" id="slide-wrapper">
         <!-- Las imágenes se generan dinámicamente por JS una vez conoce totalSlides -->
@@ -70,7 +85,7 @@
 
         function showSlide(n) {
             document.querySelectorAll('.slide.active')
-                    .forEach(el => el.classList.remove('active'));
+                .forEach(el => el.classList.remove('active'));
             const target = document.getElementById(`slide-${n}`);
             if (target) target.classList.add('active');
         }
@@ -99,4 +114,5 @@
         setInterval(poll, POLL_INTERVAL_MS);
     </script>
 </body>
+
 </html>

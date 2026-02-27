@@ -53,7 +53,8 @@ public class SlideStateService {
     }
 
     /**
-     * Establece el slide actual. Respeta los límites [1, totalSlides] (HU-004 §3,§4).
+     * Establece el slide actual. Respeta los límites [1, totalSlides] (HU-004
+     * §3,§4).
      * Si totalSlides = 0, guarda el valor tal cual (sin slides importados aún).
      */
     public SlideStateResponse setSlide(int requestedSlide) {

@@ -10,7 +10,8 @@ import org.springframework.stereotype.Service;
 
 /**
  * Gestiona el estado del modo demo en Redis.
- * La clave Redis "demo_state" guarda: { "mode": "slides|url", "slide": N, "url": "...", "returnSlide": N }
+ * La clave Redis "demo_state" guarda: { "mode": "slides|url", "slide": N,
+ * "url": "...", "returnSlide": N }
  */
 @Service
 public class DemoStateService {
@@ -26,7 +27,10 @@ public class DemoStateService {
         this.objectMapper = objectMapper;
     }
 
-    /** Retorna el estado demo actual. Si no hay estado previo, retorna modo "slides" con slide 1. */
+    /**
+     * Retorna el estado demo actual. Si no hay estado previo, retorna modo "slides"
+     * con slide 1.
+     */
     public DemoState getDemoState() {
         String raw = redis.opsForValue().get(DEMO_KEY);
         if (raw == null) {

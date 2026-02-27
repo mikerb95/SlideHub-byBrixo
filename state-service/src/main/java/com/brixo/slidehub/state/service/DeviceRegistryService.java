@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Registro de dispositivos conectados (HU-014, HU-015).
  *
  * TODO: En Fase 2 o posterior, persistir en Redis con HSET o en PostgreSQL.
- *       Por ahora se usa un mapa en memoria — se pierde al reiniciar el servicio.
+ * Por ahora se usa un mapa en memoria — se pierde al reiniciar el servicio.
  */
 @Service
 public class DeviceRegistryService {

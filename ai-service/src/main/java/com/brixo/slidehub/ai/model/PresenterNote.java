@@ -8,9 +8,11 @@ import org.springframework.data.mongodb.core.index.CompoundIndex;
 import java.util.List;
 
 /**
- * Documento MongoDB que representa las notas del presentador para un slide (CLAUDE.md §10).
+ * Documento MongoDB que representa las notas del presentador para un slide
+ * (CLAUDE.md §10).
  *
- * No usa record: necesita @Id y mutabilidad para el upsert por presentationId+slideNumber (HU-016 §2).
+ * No usa record: necesita @Id y mutabilidad para el upsert por
+ * presentationId+slideNumber (HU-016 §2).
  */
 @Document(collection = "presenter_notes")
 @CompoundIndex(name = "pres_slide_idx", def = "{'presentationId': 1, 'slideNumber': 1}", unique = true)
@@ -29,8 +31,8 @@ public class PresenterNote {
 
     // Constructor completo para creación
     public PresenterNote(String presentationId, int slideNumber, String title,
-                         List<String> points, String suggestedTime,
-                         List<String> keyPhrases, List<String> demoTags) {
+            List<String> points, String suggestedTime,
+            List<String> keyPhrases, List<String> demoTags) {
         this.presentationId = presentationId;
         this.slideNumber = slideNumber;
         this.title = title;
@@ -41,16 +43,42 @@ public class PresenterNote {
     }
 
     // Constructor vacío requerido por Spring Data MongoDB
-    public PresenterNote() {}
+    public PresenterNote() {
+    }
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public String getId() {
+        return id;
+    }
 
-    public String getPresentationId() { return presentationId; }
-    public int getSlideNumber() { return slideNumber; }
-    public String getTitle() { return title; }
-    public List<String> getPoints() { return points; }
-    public String getSuggestedTime() { return suggestedTime; }
-    public List<String> getKeyPhrases() { return keyPhrases; }
-    public List<String> getDemoTags() { return demoTags; }
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getPresentationId() {
+        return presentationId;
+    }
+
+    public int getSlideNumber() {
+        return slideNumber;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public List<String> getPoints() {
+        return points;
+    }
+
+    public String getSuggestedTime() {
+        return suggestedTime;
+    }
+
+    public List<String> getKeyPhrases() {
+        return keyPhrases;
+    }
+
+    public List<String> getDemoTags() {
+        return demoTags;
+    }
 }

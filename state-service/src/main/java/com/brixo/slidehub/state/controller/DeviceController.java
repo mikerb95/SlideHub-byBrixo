@@ -12,8 +12,8 @@ import java.util.List;
  * Acceso protegido — en producción sólo ADMIN puede llamar estos endpoints.
  * La seguridad en Phase 0 se delega al gateway o al ui-service.
  *
- * GET /api/devices                   → lista todos los dispositivos
- * GET /api/devices/token/{token}     → busca dispositivo por token único
+ * GET /api/devices → lista todos los dispositivos
+ * GET /api/devices/token/{token} → busca dispositivo por token único
  */
 @RestController
 @RequestMapping("/api/devices")

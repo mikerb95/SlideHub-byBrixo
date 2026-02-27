@@ -6,7 +6,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 
 /**
- * Verifica que el contexto de Spring arranca correctamente sin servicios externos.
+ * Verifica que el contexto de Spring arranca correctamente sin servicios
+ * externos.
  */
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK)
 @TestPropertySource(properties = {
