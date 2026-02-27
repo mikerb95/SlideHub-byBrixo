@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>SlideHub — Remote</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #111;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            touch-action: pan-y;
+            user-select: none;
+        }
+        #slide-indicator {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            opacity: 0.7;
+        }
+        .controls {
+            display: flex;
+            gap: 3rem;
+            align-items: center;
+        }
+        .btn-nav {
+            background: #333;
+            border: none;
+            color: white;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            font-size: 2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-nav:active { background: #555; transform: scale(0.95); }
+        .btn-nav:disabled { opacity: 0.3; cursor: default; }
+        #swipe-hint {
+            margin-top: 3rem;
+            opacity: 0.4;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="slide-indicator">Slide — / —</div>
+    <div class="controls">
+        <button class="btn-nav" id="btn-prev" disabled aria-label="Anterior">
+            <i class="fa fa-chevron-left"></i>
+        </button>
+        <button class="btn-nav" id="btn-next" disabled aria-label="Siguiente">
+            <i class="fa fa-chevron-right"></i>
+        </button>
+    </div>
+    <div id="swipe-hint">← desliza →</div>
+
+    <script th:inline="javascript">
+        const POLL_INTERVAL_MS = /*[[${pollIntervalMs}]]*/ 1000;
+        const API_SLIDE_URL = '/api/slide';
+
+        let currentSlide = 1;
+        let totalSlides = 0;
+
+        const indicator = document.getElementById('slide-indicator');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+
+        function updateUI() {
+            indicator.textContent = `Slide ${currentSlide} / ${totalSlides}`;
+            btnPrev.disabled = currentSlide <= 1;
+            btnNext.disabled = currentSlide >= totalSlides;
+        }
+
+        async function fetchState() {
+            try {
+                const res = await fetch(API_SLIDE_URL);
+                if (!res.ok) return;
+                const data = await res.json();
+                currentSlide = data.slide;
+                totalSlides = data.totalSlides;
+                updateUI();
+            } catch (_) {}
+        }
+
+        async function navigate(delta) {
+            const target = currentSlide + delta;
+            if (target < 1 || target > totalSlides) return;
+            try {
+                await fetch(API_SLIDE_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ slide: target })
+                });
+                currentSlide = target;
+                updateUI();
+                if (navigator.vibrate) navigator.vibrate(30);
+            } catch (_) {}
+        }
+
+        btnPrev.addEventListener('click', () => navigate(-1));
+        btnNext.addEventListener('click', () => navigate(1));
+
+        // Soporte swipe (HU-004)
+        let touchStartX = 0;
+        document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+        document.addEventListener('touchend', e => {
+            const diff = touchStartX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) navigate(diff > 0 ? 1 : -1);
+        }, { passive: true });
+
+        fetchState();
+        setInterval(fetchState, POLL_INTERVAL_MS);
+    </script>
+</body>
+</html>
