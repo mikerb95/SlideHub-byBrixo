@@ -36,7 +36,9 @@ public class DeploymentGuide {
     /** Guía paso a paso como texto con saltos de línea numerados. */
     private String guide;
 
-    /** Consejos adicionales de despliegue para esta combinación proyecto-plataforma. */
+    /**
+     * Consejos adicionales de despliegue para esta combinación proyecto-plataforma.
+     */
     private List<String> tips;
 
     /** Contenido de ejemplo de .env para este proyecto. */

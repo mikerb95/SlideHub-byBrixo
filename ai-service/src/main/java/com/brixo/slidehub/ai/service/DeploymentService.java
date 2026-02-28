@@ -20,9 +20,9 @@ import java.util.UUID;
  *
  * Flujo completo:
  * 1. analyzeRepository() → obtiene análisis técnico del repo (cache o Gemini)
- * 2. generateDockerfile()  → genera Dockerfile vía Groq y actualiza RepoAnalysis
+ * 2. generateDockerfile() → genera Dockerfile vía Groq y actualiza RepoAnalysis
  * 3. generateDeploymentGuide() → genera guía paso a paso vía Groq y persiste en
- *    {@code deployment_guides}
+ * {@code deployment_guides}
  */
 @Service
 public class DeploymentService {
@@ -63,7 +63,8 @@ public class DeploymentService {
      * Genera un Dockerfile optimizado para el proyecto usando Groq.
      * Actualiza el campo {@code dockerfile} en el {@link RepoAnalysis} guardado.
      *
-     * @param repoUrl     URL del repositorio (para recuperar/actualizar el análisis)
+     * @param repoUrl     URL del repositorio (para recuperar/actualizar el
+     *                    análisis)
      * @param language    lenguaje principal detectado
      * @param framework   framework detectado
      * @param ports       puertos que expone la aplicación

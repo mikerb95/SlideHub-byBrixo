@@ -16,9 +16,11 @@ import java.util.Map;
  *
  * Tres operaciones disponibles:
  * <ol>
- *   <li>{@code POST /api/ai/deploy/analyze}    — análisis técnico del repositorio</li>
- *   <li>{@code POST /api/ai/deploy/dockerfile}  — genera Dockerfile optimizado</li>
- *   <li>{@code POST /api/ai/deploy/guide}       — guía de despliegue paso a paso</li>
+ * <li>{@code POST /api/ai/deploy/analyze} — análisis técnico del
+ * repositorio</li>
+ * <li>{@code POST /api/ai/deploy/dockerfile} — genera Dockerfile
+ * optimizado</li>
+ * <li>{@code POST /api/ai/deploy/guide} — guía de despliegue paso a paso</li>
  * </ol>
  *
  * Acceso: público (sin autenticación en ai-service; la seguridad se aplica en
@@ -55,7 +57,8 @@ public class DeployTutorController {
      * Consulta la cache de MongoDB antes de llamar a Gemini.
      *
      * @param body mapa con clave {@code repoUrl}
-     * @return {@link RepoAnalysis} con language, framework, technologies, ports, databases, etc.
+     * @return {@link RepoAnalysis} con language, framework, technologies, ports,
+     *         databases, etc.
      */
     @PostMapping("/analyze")
     public ResponseEntity<?> analyzeRepo(@RequestBody Map<String, String> body) {
@@ -116,7 +119,8 @@ public class DeployTutorController {
      * indicada.
      *
      * @param req cuerpo con repoUrl y platform ("render" | "vercel" | "netlify")
-     * @return {@link DeploymentGuide} con guide, tips, dockerfile y environmentExample
+     * @return {@link DeploymentGuide} con guide, tips, dockerfile y
+     *         environmentExample
      */
     @PostMapping("/guide")
     public ResponseEntity<?> generateGuide(@RequestBody GuideRequest req) {
