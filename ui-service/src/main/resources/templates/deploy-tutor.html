@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Deploy Tutor - SlideHub</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+</head>
+<body class="p-4">
+<div class="container">
+    <h1>Deploy Tutor</h1>
+    <form id="analyze-form" class="mb-4">
+        <div class="mb-3">
+            <label for="repoUrl" class="form-label">GitHub Repo URL</label>
+            <input type="url" class="form-control" id="repoUrl" required>
+        </div>
+        <div class="mb-3">
+            <label for="platform" class="form-label">Plataforma</label>
+            <select id="platform" class="form-select">
+                <option value="render" selected>Render</option>
+                <option value="vercel">Vercel</option>
+                <option value="netlify">Netlify</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Analizar y Generar Guía</button>
+    </form>
+
+    <div id="results" style="display:none;">
+        <h2>Análisis</h2>
+        <pre id="analysis-output" class="bg-light p-2"></pre>
+
+        <h2>Dockerfile</h2>
+        <pre id="dockerfile-output" class="bg-dark text-white p-2"></pre>
+        <button id="download-dockerfile" class="btn btn-secondary mb-3">Descargar Dockerfile</button>
+
+        <h2>Guía de Deployment</h2>
+        <pre id="guide-output" class="bg-light p-2"></pre>
+        <button id="download-guide" class="btn btn-secondary mb-3">Descargar Guía</button>
+    </div>
+</div>
+
+<script>
+    document.getElementById('analyze-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const repoUrl = document.getElementById('repoUrl').value;
+        const platform = document.getElementById('platform').value;
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.style.display = 'none';
+
+        // 1. Analyze
+        let analysis;
+        try {
+            const resp = await fetch('/api/ai/deploy/analyze', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({repoUrl})
+            });
+            analysis = await resp.json();
+            document.getElementById('analysis-output').textContent = JSON.stringify(analysis, null, 2);
+        } catch (e) {
+            alert('Error analizando repo: ' + e);
+            return;
+        }
+
+        // 2. Dockerfile
+        let dockerResp;
+        try {
+            const resp = await fetch('/api/ai/deploy/dockerfile', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    repoUrl,
+                    language: analysis.language,
+                    framework: analysis.framework,
+                    ports: analysis.ports,
+                    environment: analysis.environment
+                })
+            });
+            dockerResp = await resp.json();
+            document.getElementById('dockerfile-output').textContent = dockerResp.dockerfile;
+        } catch (e) {
+            alert('Error generando Dockerfile: ' + e);
+            return;
+        }
+
+        // 3. Guide
+        let guideResp;
+        try {
+            const resp = await fetch('/api/ai/deploy/guide', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({repoUrl, platform})
+            });
+            guideResp = await resp.json();
+            document.getElementById('guide-output').textContent = guideResp.guide;
+        } catch (e) {
+            alert('Error generando guía: ' + e);
+            return;
+        }
+
+        resultsDiv.style.display = 'block';
+    });
+
+    document.getElementById('download-dockerfile').addEventListener('click', () => {
+        const content = document.getElementById('dockerfile-output').textContent;
+        const blob = new Blob([content], {type: 'text/plain'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Dockerfile';
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('download-guide').addEventListener('click', () => {
+        const content = document.getElementById('guide-output').textContent;
+        const blob = new Blob([content], {type: 'text/plain'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'DEPLOY_GUIDE.md';
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+</script>
+
+</body>
+</html>
