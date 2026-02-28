@@ -48,8 +48,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/**").permitAll()
                         // Recursos estáticos (CSS, JS, imágenes)
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/slides/**").permitAll()
-                        // Panel del presentador y main panel — requiere PRESENTER o ADMIN
-                        .requestMatchers("/presenter", "/main-panel").hasAnyRole("PRESENTER", "ADMIN")
+                        // Panel del presentador, main panel y tutor de deployment — requiere PRESENTER o ADMIN
+                        .requestMatchers("/presenter", "/main-panel", "/deploy-tutor").hasAnyRole("PRESENTER", "ADMIN")
                         // Perfil del usuario — requiere estar autenticado
                         .requestMatchers("/auth/profile").authenticated()
                         .anyRequest().authenticated())
