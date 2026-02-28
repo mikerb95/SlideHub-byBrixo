@@ -98,6 +98,111 @@ public class GroqService {
         }
     }
 
+    // ── Generación de Dockerfile (Fase 5) ─────────────────────────────────────
+
+    /**
+     * Genera un Dockerfile optimizado para el proyecto detectado (PLAN-EXPANSION.md
+     * Fase 5, tarea 42-B).
+     *
+     * @param language    lenguaje principal (Java, Node.js, Python, etc.)
+     * @param framework   framework principal (Spring Boot, Next.js, FastAPI, etc.)
+     * @param ports       puertos que expone la aplicación
+     * @param environment variables de entorno requeridas
+     * @return contenido del Dockerfile como texto plano
+     */
+    public String generateDockerfile(String language, String framework,
+            List<Integer> ports, List<String> environment) {
+        String portsStr = ports == null || ports.isEmpty() ? "8080" : ports.stream()
+                .map(String::valueOf).reduce((a, b) -> a + " " + b).orElse("8080");
+        String envStr = environment == null || environment.isEmpty()
+                ? "ninguna específica"
+                : String.join(", ", environment);
+
+        String prompt = """
+                Genera un Dockerfile de producción para una aplicación %s con %s.
+                Puertos a exponer: %s
+                Variables de entorno esperadas: %s
+
+                Requisitos del Dockerfile:
+                - Usar imagen base oficial y slim/alpine donde sea posible
+                - Multi-stage build si aplica (compilación separada de runtime)
+                - Comando HEALTHCHECK apropiado
+                - Usar usuario no-root por seguridad
+                - Incluir ARG/ENV para las variables de entorno importantes
+                - Comentarios breves explicando cada sección clave
+
+                Devuelve SOLO el contenido del Dockerfile, sin bloques de código markdown (sin ```).
+                """.formatted(language, framework, portsStr, envStr);
+
+        String raw = callGroqRaw(prompt,
+                "Eres un experto en DevOps. Genera Dockerfiles claros, seguros y de producción.");
+        return stripMarkdownCode(raw);
+    }
+
+    // ── Generación de guía de despliegue (Fase 5) ─────────────────────────────
+
+    /**
+     * Genera una guía paso a paso para desplegar en la plataforma indicada
+     * (PLAN-EXPANSION.md Fase 5, tarea 42-C).
+     *
+     * @param language    lenguaje principal del proyecto
+     * @param framework   framework detectado
+     * @param platform    plataforma destino: "render", "vercel" o "netlify"
+     * @param environment variables de entorno requeridas
+     * @param databases   bases de datos detectadas
+     * @return mapa con "guide" (String con pasos numerados) y "tips" (List&lt;String&gt;)
+     */
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> generateDeploymentGuide(String language, String framework,
+            String platform, List<String> environment, List<String> databases) {
+        String envStr = environment == null || environment.isEmpty()
+                ? "pocas variables de entorno"
+                : String.join(", ", environment);
+        String dbStr = databases == null || databases.isEmpty()
+                ? "sin base de datos específica"
+                : String.join(", ", databases);
+
+        String prompt = """
+                Genera una guía paso a paso para desplegar una aplicación %s con %s en %s.
+                Variables de entorno necesarias: %s
+                Bases de datos: %s
+
+                La respuesta debe ser JSON con esta estructura exacta:
+                {
+                  "guide": "1. Primer paso\\n2. Segundo paso\\n...",
+                  "tips": ["consejo 1", "consejo 2", "consejo 3"],
+                  "environmentExample": "DATABASE_URL=\\nREDIS_HOST=\\n..."
+                }
+
+                La guía debe incluir: conectar repositorio, configurar BD, variables de entorno,
+                build/start commands, desplegar y verificar logs.
+                Responde SOLO el JSON, sin texto adicional.
+                """.formatted(language, framework, platform, envStr, dbStr);
+
+        String raw = callGroqRaw(prompt,
+                "Eres un experto en despliegue de aplicaciones. Responde SIEMPRE en JSON válido.");
+        raw = stripMarkdownJson(raw);
+
+        try {
+            return objectMapper.readValue(raw, Map.class);
+        } catch (Exception e) {
+            log.error("Error parseando guía de deployment de Groq: {}", e.getMessage());
+            String fallbackGuide = """
+                    1. Crear cuenta en %s
+                    2. Conectar repositorio de GitHub
+                    3. Configurar variables de entorno: %s
+                    4. Ejecutar deploy
+                    5. Revisar logs en el dashboard
+                    """.formatted(platform, envStr);
+            return Map.of(
+                    "guide", fallbackGuide,
+                    "tips", List.of(
+                            "Verificar que todas las variables de entorno estén configuradas",
+                            "Revisar el archivo de build logs si el deploy falla"),
+                    "environmentExample", buildEnvExample(environment));
+        }
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private String buildNotePrompt(String repoContext, String slideDescription, int slideNumber) {
