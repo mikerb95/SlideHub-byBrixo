@@ -2,10 +2,14 @@ com/brixo/slidehub/ai/controller/NotesController.class
 com/brixo/slidehub/ai/service/GroqService.class
 com/brixo/slidehub/ai/service/RepoAnalysisService.class
 com/brixo/slidehub/ai/controller/RepoAnalysisController.class
+com/brixo/slidehub/ai/repository/DeploymentGuideRepository.class
 com/brixo/slidehub/ai/model/RepoAnalysis.class
+com/brixo/slidehub/ai/controller/DeployTutorController$GuideRequest.class
 com/brixo/slidehub/ai/model/GenerateNoteRequest.class
 com/brixo/slidehub/ai/service/GeminiService.class
+com/brixo/slidehub/ai/controller/DeployTutorController.class
 com/brixo/slidehub/ai/model/NoteContent.class
+com/brixo/slidehub/ai/model/DeploymentGuide.class
 com/brixo/slidehub/ai/service/NotesService.class
 com/brixo/slidehub/ai/repository/RepoAnalysisRepository.class
 com/brixo/slidehub/ai/model/PresenterNote.class
@@ -13,3 +17,5 @@ com/brixo/slidehub/ai/model/SlideReference.class
 com/brixo/slidehub/ai/model/GenerateAllRequest.class
 com/brixo/slidehub/ai/repository/PresenterNoteRepository.class
 com/brixo/slidehub/ai/AiServiceApplication.class
+com/brixo/slidehub/ai/controller/DeployTutorController$DockerfileRequest.class
+com/brixo/slidehub/ai/service/DeploymentService.class
