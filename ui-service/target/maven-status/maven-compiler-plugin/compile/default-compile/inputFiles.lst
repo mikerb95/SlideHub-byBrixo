@@ -6,6 +6,7 @@
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/controller/PresentationNotesController.java
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/controller/PresentationViewController.java
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/controller/PresenterViewController.java
+/home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/controller/QuickLinkController.java
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/exception/UserAlreadyExistsException.java
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/model/DriveFile.java
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/model/DriveFolder.java
@@ -18,6 +19,7 @@
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/model/SourceType.java
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/model/User.java
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/repository/PresentationRepository.java
+/home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/repository/QuickLinkRepository.java
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/repository/UserRepository.java
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/service/CustomOAuth2UserService.java
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/service/CustomUserDetailsService.java
@@ -25,5 +27,6 @@
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/service/GoogleDriveService.java
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/service/NotesBridgeService.java
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/service/PresentationService.java
+/home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/service/QuickLinkService.java
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/service/SlideUploadService.java
 /home/mike/dev/learning/SlideHub/ui-service/src/main/java/com/brixo/slidehub/ui/service/UserService.java

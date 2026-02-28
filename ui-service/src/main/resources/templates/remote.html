@@ -245,7 +245,7 @@
         <div class="sheet-links" id="sheet-links-container">
             <!-- inyectado server-side con Thymeleaf -->
             <button th:each="link : ${quickLinks}" th:data-url="${link.url}" class="demo-link-btn"
-                th:onclick="'activateDemoLink(\'' + ${link.url} + '\')'">
+                onclick="activateDemoLink(this.dataset.url)">
                 <i th:if="${link.icon != null}" th:class="${link.icon} + ' fa-fw'"></i>
                 <i th:if="${link.icon == null}" class="fa fa-link fa-fw"></i>
                 <span>
