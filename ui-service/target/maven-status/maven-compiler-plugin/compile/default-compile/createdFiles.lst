@@ -4,6 +4,7 @@ com/brixo/slidehub/ui/controller/PresentationImportController.class
 com/brixo/slidehub/ui/repository/PresentationRepository.class
 com/brixo/slidehub/ui/exception/UserAlreadyExistsException.class
 com/brixo/slidehub/ui/model/Role.class
+com/brixo/slidehub/ui/controller/PresentationNotesController.class
 com/brixo/slidehub/ui/service/EmailService.class
 com/brixo/slidehub/ui/service/GoogleDriveService.class
 com/brixo/slidehub/ui/service/SlideUploadService.class
@@ -24,4 +25,5 @@ com/brixo/slidehub/ui/controller/AuthController.class
 com/brixo/slidehub/ui/service/UserService.class
 com/brixo/slidehub/ui/controller/PresentationViewController.class
 com/brixo/slidehub/ui/service/PresentationService.class
+com/brixo/slidehub/ui/service/NotesBridgeService.class
 com/brixo/slidehub/ui/service/CustomOAuth2UserService.class

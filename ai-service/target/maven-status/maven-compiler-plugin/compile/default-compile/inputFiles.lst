@@ -1,4 +1,15 @@
 /home/mike/dev/learning/SlideHub/ai-service/src/main/java/com/brixo/slidehub/ai/AiServiceApplication.java
 /home/mike/dev/learning/SlideHub/ai-service/src/main/java/com/brixo/slidehub/ai/controller/NotesController.java
+/home/mike/dev/learning/SlideHub/ai-service/src/main/java/com/brixo/slidehub/ai/controller/RepoAnalysisController.java
+/home/mike/dev/learning/SlideHub/ai-service/src/main/java/com/brixo/slidehub/ai/model/GenerateAllRequest.java
+/home/mike/dev/learning/SlideHub/ai-service/src/main/java/com/brixo/slidehub/ai/model/GenerateNoteRequest.java
+/home/mike/dev/learning/SlideHub/ai-service/src/main/java/com/brixo/slidehub/ai/model/NoteContent.java
 /home/mike/dev/learning/SlideHub/ai-service/src/main/java/com/brixo/slidehub/ai/model/PresenterNote.java
+/home/mike/dev/learning/SlideHub/ai-service/src/main/java/com/brixo/slidehub/ai/model/RepoAnalysis.java
+/home/mike/dev/learning/SlideHub/ai-service/src/main/java/com/brixo/slidehub/ai/model/SlideReference.java
 /home/mike/dev/learning/SlideHub/ai-service/src/main/java/com/brixo/slidehub/ai/repository/PresenterNoteRepository.java
+/home/mike/dev/learning/SlideHub/ai-service/src/main/java/com/brixo/slidehub/ai/repository/RepoAnalysisRepository.java
+/home/mike/dev/learning/SlideHub/ai-service/src/main/java/com/brixo/slidehub/ai/service/GeminiService.java
+/home/mike/dev/learning/SlideHub/ai-service/src/main/java/com/brixo/slidehub/ai/service/GroqService.java
+/home/mike/dev/learning/SlideHub/ai-service/src/main/java/com/brixo/slidehub/ai/service/NotesService.java
+/home/mike/dev/learning/SlideHub/ai-service/src/main/java/com/brixo/slidehub/ai/service/RepoAnalysisService.java

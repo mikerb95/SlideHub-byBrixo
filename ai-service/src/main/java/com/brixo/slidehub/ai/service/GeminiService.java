@@ -149,25 +149,7 @@ public class GeminiService {
 
         try {
             String rawJson = callGemini(requestBody);
-            // Eliminar posibles marcadores de código markdown
             rawJson = stripMarkdownJson(rawJson);
-
-            @SuppressWarnings("unchecked")
-            Map<String, Object> result = (Map<String, Object>) geminiClient
-                    .post()
-                    .uri("/v1beta/models/gemini-1.5-flash:generateContent?key={key}", apiKey)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(requestBody)
-                    .retrieve()
-                    .bodyToMono(Map.class)
-                    .map(response -> extractTextFromResponse(response))
-                    .map(text -> {
-                        // parsing inline would be circular, use rawJson from above
-                        return Map.of("raw", text);
-                    })
-                    .block();
-
-            // usar rawJson ya obtenida del primer callGemini
             log.debug("Gemini analyzeRepo respondió: {} chars", rawJson.length());
             return Map.of("raw", rawJson);
         } catch (Exception e) {
@@ -225,7 +207,7 @@ public class GeminiService {
      * @return texto generado por Gemini
      */
     @SuppressWarnings("unchecked")
-    private String callGemini(Map<String, Object> requestBody) {
+    private String callGemini(Map<?, ?> requestBody) {
         Map<?, ?> response = geminiClient.post()
                 .uri("/v1beta/models/gemini-1.5-flash:generateContent?key={key}", apiKey)
                 .contentType(MediaType.APPLICATION_JSON)
