@@ -16,11 +16,13 @@ import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFuncti
  * Configuración de rutas del API Gateway (AGENTS.md §2.4).
  *
  * ORDEN IMPORTANTE — evaluado de menor a mayor número:
- * /api/ai/**           → ai-service:8083 (Order 1)
- * /api/presentations/** → ui-service:8082 (Order 2) — ANTES del catch-all de state
- * /api/**              → state-service:8081 (Order 3)
- * /auth/**, /slides, /presenter, /presentations/**, etc. → ui-service:8082 (Order 4)
- * /presentation/**     → ui-service:8082 (Order 5)
+ * /api/ai/** → ai-service:8083 (Order 1)
+ * /api/presentations/** → ui-service:8082 (Order 2) — ANTES del catch-all de
+ * state
+ * /api/** → state-service:8081 (Order 3)
+ * /auth/**, /slides, /presenter, /presentations/**, etc. → ui-service:8082
+ * (Order 4)
+ * /presentation/** → ui-service:8082 (Order 5)
  */
 @Configuration
 public class RoutesConfig {
