@@ -8,80 +8,66 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        body {
-            background: #0d1117;
-            color: #e6edf3;
-            min-height: 100vh;
-        }
+        body { background: #0d1117; color: #e6edf3; min-height: 100vh; }
 
         .topbar {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: #161b22;
-            border-bottom: 1px solid #30363d;
+            position: sticky; top: 0; z-index: 100;
+            background: #161b22; border-bottom: 1px solid #30363d;
             padding: 0.6rem 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            display: flex; align-items: center; gap: 0.5rem;
         }
+
+        .layout { display: flex; height: calc(100vh - 52px); }
+
+        /* Grid de slides */
+        .slide-area { flex: 1; overflow-y: auto; padding: 1rem; }
 
         .slide-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
             gap: 0.75rem;
-            padding: 1rem;
         }
 
         .slide-thumb {
-            background: #161b22;
-            border: 2px solid #30363d;
-            border-radius: 6px;
-            overflow: hidden;
-            cursor: pointer;
+            background: #161b22; border: 2px solid #30363d;
+            border-radius: 6px; overflow: hidden; cursor: pointer;
             transition: border-color 0.15s, transform 0.1s;
         }
+        .slide-thumb:hover { border-color: #58a6ff; transform: translateY(-2px); }
+        .slide-thumb.active { border-color: #3fb950; }
+        .slide-thumb img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+        .slide-thumb .slide-num { text-align: center; padding: 0.2rem; font-size: 0.75rem; opacity: 0.6; }
 
-        .slide-thumb:hover {
-            border-color: #58a6ff;
-            transform: translateY(-2px);
+        /* Sidebar */
+        .sidebar {
+            width: 300px; min-width: 260px;
+            background: #161b22; border-left: 1px solid #30363d;
+            display: flex; flex-direction: column;
+            overflow-y: auto;
         }
+        .sidebar-section { padding: 0.75rem 1rem; border-bottom: 1px solid #21262d; }
+        .sidebar-section h6 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #8b949e; margin-bottom: 0.5rem; }
 
-        .slide-thumb.active {
-            border-color: #3fb950;
+        .quick-link-btn {
+            display: flex; align-items: center; gap: 0.5rem;
+            background: #0d1117; border: 1px solid #30363d;
+            color: #e6edf3; border-radius: 6px;
+            padding: 0.5rem 0.75rem; width: 100%; text-align: left;
+            transition: background 0.15s, border-color 0.15s;
+            font-size: 0.85rem; cursor: pointer;
         }
+        .quick-link-btn:hover { background: #1f2428; border-color: #58a6ff; color: #58a6ff; }
+        .quick-link-btn.active-demo { border-color: #f78166; color: #f78166; }
+        .quick-link-btn .link-desc { font-size: 0.7rem; opacity: 0.6; display: block; }
 
-        .slide-thumb img {
-            width: 100%;
-            aspect-ratio: 16/9;
-            object-fit: cover;
-            display: block;
+        /* Modal CRUD */
+        #links-modal .modal-content { background: #161b22; border: 1px solid #30363d; color: #e6edf3; }
+        #links-modal .modal-header { border-bottom-color: #30363d; }
+        #links-modal .modal-footer { border-top-color: #30363d; }
+        #links-modal .form-control, #links-modal .form-select {
+            background: #0d1117; border-color: #30363d; color: #e6edf3;
         }
-
-        .slide-thumb .slide-num {
-            text-align: center;
-            padding: 0.2rem;
-            font-size: 0.75rem;
-            opacity: 0.6;
-        }
-
-        .demo-panel {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            padding: 1rem;
-            margin: 0 1rem 1rem;
-        }
-
-        .demo-panel h6 {
-            margin-bottom: 0.75rem;
-        }
-
-        #current-badge {
-            background: #3fb950;
-            color: black;
-            font-weight: bold;
-        }
+        .link-item { background: #0d1117; border: 1px solid #21262d; border-radius: 6px; padding: 0.5rem 0.75rem; margin-bottom: 0.5rem; }
     </style>
 </head>
 
@@ -97,43 +83,140 @@
         </a>
     </div>
 
-    <!-- Demo Panel -->
-    <div class="demo-panel">
-        <h6><i class="fa fa-laptop-code me-1"></i>Modo Demo</h6>
-        <div class="d-flex gap-2 align-items-center flex-wrap">
-            <button class="btn btn-sm btn-outline-success" id="btn-demo-slides">
-                <i class="fa fa-images me-1"></i>Volver a Slides
-            </button>
-            <div class="input-group" style="max-width: 400px;">
-                <input type="url" class="form-control form-control-sm bg-dark text-light border-secondary"
-                    id="demo-url-input" placeholder="https://mi-demo.com">
-                <button class="btn btn-sm btn-outline-info" id="btn-demo-url">
-                    <i class="fa fa-arrow-up-right-from-square me-1"></i>Abrir URL
-                </button>
+    <div class="layout">
+        <!-- Slide Grid -->
+        <div class="slide-area">
+            <div class="slide-grid" id="slide-grid">
+                <div class="text-center text-secondary" style="grid-column:1/-1; padding:3rem 0;">
+                    <i class="fa fa-spinner fa-spin fa-2x mb-2 d-block"></i>Cargando slides...
+                </div>
             </div>
-            <span id="demo-mode-badge" class="badge bg-secondary">slides</span>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+
+            <!-- Demo: modo slides -->
+            <div class="sidebar-section">
+                <h6><i class="fa fa-display me-1"></i>Modo Demo</h6>
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                    <span id="demo-mode-badge" class="badge bg-secondary">slides</span>
+                    <button class="btn btn-sm btn-outline-success" id="btn-demo-slides">
+                        <i class="fa fa-images me-1"></i>Volver a Slides
+                    </button>
+                </div>
+                <div class="input-group input-group-sm mb-1">
+                    <input type="url" class="form-control bg-dark text-light border-secondary"
+                        id="demo-url-input" placeholder="https://mi-demo.com">
+                    <button class="btn btn-outline-info" id="btn-demo-url">
+                        <i class="fa fa-arrow-up-right-from-square"></i>
+                    </button>
+                </div>
+                <div class="form-text" style="color:#8b949e; font-size:0.7rem;">
+                    Usar URL personalizada
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="sidebar-section flex-grow-1">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0"><i class="fa fa-bolt me-1"></i>Quick Links</h6>
+                    <button th:if="${presentationId != ''}"
+                            class="btn btn-sm btn-outline-secondary py-0 px-2"
+                            style="font-size:0.7rem;"
+                            data-bs-toggle="modal" data-bs-target="#links-modal">
+                        <i class="fa fa-pencil"></i> Editar
+                    </button>
+                </div>
+
+                <!-- Inyectado server-side desde Thymeleaf -->
+                <div id="quick-links-list">
+                    <div th:if="${quickLinks.isEmpty()}" class="text-center" style="color:#8b949e; font-size:0.8rem; padding: 1rem 0;">
+                        <span th:if="${presentationId == ''}">
+                            Abre esta vista con <code>?presentationId=...</code>
+                        </span>
+                        <span th:if="${presentationId != ''}">
+                            Sin links configurados.
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#links-modal"
+                               class="text-info">Añadir</a>
+                        </span>
+                    </div>
+
+                    <button th:each="link : ${quickLinks}"
+                            th:data-url="${link.url}"
+                            th:data-title="${link.title}"
+                            class="quick-link-btn mb-2"
+                            onclick="activateDemoLink(this.dataset.url, this.dataset.title)">
+                        <i th:if="${link.icon != null}" th:class="${link.icon} + ' fa-fw'"></i>
+                        <i th:if="${link.icon == null}" class="fa fa-link fa-fw"></i>
+                        <span>
+                            <span th:text="${link.title}">Título</span>
+                            <span th:if="${link.description != null}"
+                                  th:text="${link.description}"
+                                  class="link-desc"></span>
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+        </div><!-- /sidebar -->
+    </div><!-- /layout -->
+
+    <!-- Modal CRUD Quick Links -->
+    <div class="modal fade" id="links-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa fa-bolt me-2"></i>Gestionar Quick Links</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="links-list-modal" class="mb-3"><!-- populated by JS --></div>
+                    <hr style="border-color:#30363d;">
+                    <h6 class="mb-2">Nuevo link</h6>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="new-link-title" placeholder="Título *">
+                        </div>
+                        <div class="col-md-6">
+                            <input type="url" class="form-control" id="new-link-url" placeholder="URL *">
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="new-link-icon"
+                                   placeholder="Icono FA (ej. fa-brands fa-github)">
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control" id="new-link-desc" placeholder="Descripción (opcional)">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="addQuickLink()">
+                        <i class="fa fa-plus me-1"></i>Añadir Link
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Slide Grid -->
-    <div class="slide-grid" id="slide-grid">
-        <div class="text-center text-secondary" style="grid-column: 1/-1; padding: 3rem 0;">
-            <i class="fa fa-spinner fa-spin fa-2x mb-2 d-block"></i>
-            Cargando slides...
-        </div>
-    </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script th:inline="javascript">
         const POLL_INTERVAL_MS = /*[[${pollIntervalMs}]]*/ 1000;
+        const PRESENTATION_ID = /*[[${presentationId}]]*/ '';
         const API_SLIDE_URL = '/api/slide';
         const API_DEMO_URL = '/api/demo';
+        const LINKS_API = '/api/presentations/' + PRESENTATION_ID + '/links';
 
         let currentSlide = 0;
         let totalSlides = 0;
+        let demoMode = 'slides';
 
         const grid = document.getElementById('slide-grid');
         const counter = document.getElementById('slide-counter');
         const demoModeBadge = document.getElementById('demo-mode-badge');
+
+        // ── Slide grid ─────────────────────────────────────────────────────────
 
         function buildGrid(total) {
             grid.innerHTML = '';
@@ -141,10 +224,8 @@
                 const div = document.createElement('div');
                 div.className = 'slide-thumb';
                 div.dataset.slide = i;
-                div.innerHTML = `
-                    <img src="/presentation/Slide${i}.PNG" alt="Slide ${i}" loading="lazy">
-                    <div class="slide-num">${i}</div>
-                `;
+                div.innerHTML = `<img src="/presentation/Slide${i}.PNG" alt="Slide ${i}" loading="lazy">
+                                 <div class="slide-num">${i}</div>`;
                 div.addEventListener('click', () => goToSlide(i));
                 grid.appendChild(div);
             }
@@ -163,41 +244,57 @@
         }
 
         function updateActiveThumb() {
-            document.querySelectorAll('.slide-thumb.active')
-                .forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.slide-thumb.active').forEach(el => el.classList.remove('active'));
             const t = document.querySelector(`.slide-thumb[data-slide="${currentSlide}"]`);
-            if (t) {
-                t.classList.add('active');
-                t.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
+            if (t) { t.classList.add('active'); t.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
             counter.textContent = `${currentSlide} / ${totalSlides}`;
         }
 
+        // ── Polling ────────────────────────────────────────────────────────────
+
         async function fetchState() {
             try {
-                const [slideRes, demoRes] = await Promise.all([
-                    fetch(API_SLIDE_URL),
-                    fetch(API_DEMO_URL)
-                ]);
+                const [slideRes, demoRes] = await Promise.all([fetch(API_SLIDE_URL), fetch(API_DEMO_URL)]);
                 if (!slideRes.ok) return;
                 const data = await slideRes.json();
-                if (data.totalSlides !== totalSlides) {
-                    totalSlides = data.totalSlides;
-                    buildGrid(totalSlides);
-                }
-                if (data.slide !== currentSlide) {
-                    currentSlide = data.slide;
-                    updateActiveThumb();
-                }
+                if (data.totalSlides !== totalSlides) { totalSlides = data.totalSlides; buildGrid(totalSlides); }
+                if (data.slide !== currentSlide) { currentSlide = data.slide; updateActiveThumb(); }
                 if (demoRes.ok) {
                     const demo = await demoRes.json();
-                    demoModeBadge.textContent = demo.mode === 'url' ? `url: ${demo.url}` : 'slides';
-                    demoModeBadge.className = `badge ${demo.mode === 'url' ? 'bg-info text-dark' : 'bg-secondary'}`;
+                    demoMode = demo.mode;
+                    updateDemoBadge(demo);
                 }
             } catch (_) { }
         }
 
-        // Demo controls
+        function updateDemoBadge(demo) {
+            if (demo.mode === 'url') {
+                demoModeBadge.textContent = '🌐 Demo activa';
+                demoModeBadge.className = 'badge bg-info text-dark';
+                // Marcar el link activo
+                document.querySelectorAll('.quick-link-btn').forEach(btn => {
+                    btn.classList.toggle('active-demo', btn.dataset.url === demo.url);
+                });
+            } else {
+                demoModeBadge.textContent = 'slides';
+                demoModeBadge.className = 'badge bg-secondary';
+                document.querySelectorAll('.quick-link-btn').forEach(btn => btn.classList.remove('active-demo'));
+            }
+        }
+
+        // ── Demo controls ──────────────────────────────────────────────────────
+
+        /** Activa un quick link como demo, guardando returnSlide. */
+        async function activateDemoLink(url, title) {
+            try {
+                await fetch(API_DEMO_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mode: 'url', url, returnSlide: currentSlide })
+                });
+            } catch (_) { }
+        }
+
         document.getElementById('btn-demo-slides').addEventListener('click', async () => {
             try {
                 await fetch(API_DEMO_URL, {
@@ -215,14 +312,73 @@
                 await fetch(API_DEMO_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ mode: 'url', url })
+                    body: JSON.stringify({ mode: 'url', url, returnSlide: currentSlide })
                 });
+                document.getElementById('demo-url-input').value = '';
             } catch (_) { }
         });
 
+        // ── CRUD Quick Links ───────────────────────────────────────────────────
+
+        async function loadLinksModal() {
+            if (!PRESENTATION_ID) return;
+            const res = await fetch(LINKS_API);
+            const links = res.ok ? await res.json() : [];
+            const container = document.getElementById('links-list-modal');
+            if (links.length === 0) {
+                container.innerHTML = '<p class="text-secondary small">Sin links todavía.</p>';
+                return;
+            }
+            container.innerHTML = links.map(l => `
+                <div class="link-item d-flex align-items-center gap-2">
+                    <i class="${l.icon || 'fa fa-link'} fa-fw text-info"></i>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold small">${l.title}</div>
+                        <div class="text-secondary" style="font-size:0.7rem;">${l.url}</div>
+                    </div>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteLink('${l.id}')">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>`).join('');
+        }
+
+        async function addQuickLink() {
+            if (!PRESENTATION_ID) return;
+            const title = document.getElementById('new-link-title').value.trim();
+            const url = document.getElementById('new-link-url').value.trim();
+            const icon = document.getElementById('new-link-icon').value.trim() || null;
+            const description = document.getElementById('new-link-desc').value.trim() || null;
+            if (!title || !url) { alert('Título y URL son obligatorios.'); return; }
+            try {
+                const res = await fetch(LINKS_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, url, icon, description })
+                });
+                if (res.ok) {
+                    ['new-link-title','new-link-url','new-link-icon','new-link-desc']
+                        .forEach(id => document.getElementById(id).value = '');
+                    await loadLinksModal();
+                    // Recargar la página para reflejar los links nuevos en el sidebar
+                    location.reload();
+                }
+            } catch (_) { }
+        }
+
+        async function deleteLink(linkId) {
+            if (!confirm('¿Eliminar este link?')) return;
+            try {
+                const res = await fetch(LINKS_API + '/' + linkId, { method: 'DELETE' });
+                if (res.ok) { await loadLinksModal(); location.reload(); }
+            } catch (_) { }
+        }
+
+        // Cargar links cuando se abre el modal
+        document.getElementById('links-modal').addEventListener('show.bs.modal', loadLinksModal);
+
+        // Arrancar
         fetchState();
         setInterval(fetchState, POLL_INTERVAL_MS);
     </script>
 </body>
-
 </html>

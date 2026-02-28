@@ -25,6 +25,7 @@ public class QuickLink {
     @Column(length = 36)
     private String id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "presentation_id", nullable = false)
     private Presentation presentation;

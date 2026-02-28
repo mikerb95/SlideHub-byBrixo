@@ -16,7 +16,8 @@ import java.util.UUID;
  * CRUD de quick links asociados a una presentación (Fase 4 — PLAN-EXPANSION.md
  * tarea 37).
  *
- * Los quick links aparecen en el sidebar del main-panel y en el bottom sheet del
+ * Los quick links aparecen en el sidebar del main-panel y en el bottom sheet
+ * del
  * remote, permitiendo al presentador activar demos sin salir de la vista de
  * control.
  */
@@ -54,7 +55,8 @@ public class QuickLinkService {
      * @param presentationId UUID de la presentación
      * @param title          Texto del botón
      * @param url            URL de destino (demo, recurso, etc.)
-     * @param icon           Clase Font Awesome (ej. "fa-brands fa-github"), nullable
+     * @param icon           Clase Font Awesome (ej. "fa-brands fa-github"),
+     *                       nullable
      * @param description    Descripción corta, nullable
      * @return QuickLink persistido
      * @throws IllegalArgumentException si la presentación no existe
@@ -101,7 +103,7 @@ public class QuickLinkService {
             link.setTitle(title);
         if (url != null)
             link.setUrl(url);
-        link.setIcon(icon);      // puede ser null para borrar icono
+        link.setIcon(icon); // puede ser null para borrar icono
         link.setDescription(description);
         if (displayOrder != null)
             link.setDisplayOrder(displayOrder);
