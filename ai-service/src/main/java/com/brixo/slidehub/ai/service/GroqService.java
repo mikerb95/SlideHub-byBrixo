@@ -112,8 +112,9 @@ public class GroqService {
      */
     public String generateDockerfile(String language, String framework,
             List<Integer> ports, List<String> environment) {
-        String portsStr = ports == null || ports.isEmpty() ? "8080" : ports.stream()
-                .map(String::valueOf).reduce((a, b) -> a + " " + b).orElse("8080");
+        String portsStr = ports == null || ports.isEmpty() ? "8080"
+                : ports.stream()
+                        .map(String::valueOf).reduce((a, b) -> a + " " + b).orElse("8080");
         String envStr = environment == null || environment.isEmpty()
                 ? "ninguna específica"
                 : String.join(", ", environment);
@@ -150,7 +151,8 @@ public class GroqService {
      * @param platform    plataforma destino: "render", "vercel" o "netlify"
      * @param environment variables de entorno requeridas
      * @param databases   bases de datos detectadas
-     * @return mapa con "guide" (String con pasos numerados) y "tips" (List&lt;String&gt;)
+     * @return mapa con "guide" (String con pasos numerados) y "tips"
+     *         (List&lt;String&gt;)
      */
     @SuppressWarnings("unchecked")
     public Map<String, Object> generateDeploymentGuide(String language, String framework,
@@ -261,5 +263,64 @@ public class GroqService {
             text = text.substring(0, text.length() - 3);
         }
         return text.strip();
+    }
+
+    /** Elimina marcadores de bloque de código genéricos (``` o ```dockerfile). */
+    private String stripMarkdownCode(String text) {
+        if (text == null)
+            return "";
+        text = text.strip();
+        for (String lang : List.of("```dockerfile", "```bash", "```yaml", "```json", "```")) {
+            if (text.startsWith(lang)) {
+                text = text.substring(lang.length());
+                break;
+            }
+        }
+        if (text.endsWith("```")) {
+            text = text.substring(0, text.length() - 3);
+        }
+        return text.strip();
+    }
+
+    /**
+     * Realiza una llamada genérica a Groq y devuelve el texto crudo de la
+     * respuesta.
+     */
+    private String callGroqRaw(String userPrompt, String systemMessage) {
+        var requestBody = Map.of(
+                "model", model,
+                "messages", List.of(
+                        Map.of("role", "system", "content", systemMessage),
+                        Map.of("role", "user", "content", userPrompt)),
+                "temperature", 0.4,
+                "max_tokens", 2048);
+
+        try {
+            Map<?, ?> response = groqClient.post()
+                    .uri("/openai/v1/chat/completions")
+                    .header("Authorization", "Bearer " + apiKey)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(requestBody)
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+
+            return extractMessageContent(response);
+        } catch (Exception e) {
+            log.error("Error en llamada genérica a Groq: {}", e.getMessage());
+            return "";
+        }
+    }
+
+    /** Construye un archivo .env de ejemplo a partir de la lista de variables. */
+    private String buildEnvExample(List<String> environment) {
+        if (environment == null || environment.isEmpty()) {
+            return "# No se detectaron variables de entorno específicas";
+        }
+        StringBuilder sb = new StringBuilder("# Variables de entorno requeridas\n");
+        for (String var : environment) {
+            sb.append(var).append("=\n");
+        }
+        return sb.toString().stripTrailing();
     }
 }
