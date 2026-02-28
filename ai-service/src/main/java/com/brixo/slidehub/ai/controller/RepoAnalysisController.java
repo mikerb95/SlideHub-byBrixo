@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 /**
- * Endpoint para análisis técnico de repositorios GitHub (PLAN-EXPANSION.md Fase 3,
+ * Endpoint para análisis técnico de repositorios GitHub (PLAN-EXPANSION.md Fase
+ * 3,
  * tarea 33).
  *
  * Cachea los resultados en MongoDB para evitar llamadas repetidas a Gemini.

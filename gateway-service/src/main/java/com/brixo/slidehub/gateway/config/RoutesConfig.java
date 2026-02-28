@@ -15,16 +15,12 @@ import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFuncti
 /**
  * Configuración de rutas del API Gateway (AGENTS.md §2.4).
  *
- * ORDEN IMPORTANTE: /api/ai/** (Order=1) DEBE ir ANTES que /api/** (Order=2).
- * Spring compone múltiples beans RouterFunction en orden por @Order.
- *
- * Tabla de rutas:
- * /api/ai/** → ai-service:8083 (Order 1)
- * /api/** → state-service:8081 (Order 2)
- * /auth/**,
- * /slides, /remote,
- * /presenter, etc. → ui-service:8082 (Order 3)
- * /presentation/** → ui-service:8082 (Order 4)
+ * ORDEN IMPORTANTE — evaluado de menor a mayor número:
+ * /api/ai/**           → ai-service:8083 (Order 1)
+ * /api/presentations/** → ui-service:8082 (Order 2) — ANTES del catch-all de state
+ * /api/**              → state-service:8081 (Order 3)
+ * /auth/**, /slides, /presenter, /presentations/**, etc. → ui-service:8082 (Order 4)
+ * /presentation/**     → ui-service:8082 (Order 5)
  */
 @Configuration
 public class RoutesConfig {
@@ -48,9 +44,22 @@ public class RoutesConfig {
                 .build();
     }
 
-    /** State routes (Order=2) */
+    /**
+     * Presentations API → ui-service (Order=2).
+     * DEBE ir ANTES que /api/** (Order=3) para no caer en state-service.
+     */
     @Bean
     @Order(2)
+    public RouterFunction<ServerResponse> presentationApiRoutes() {
+        return route("presentation-api-routes")
+                .route(RequestPredicates.path("/api/presentations/**"), http())
+                .filter(uri(uiServiceUrl))
+                .build();
+    }
+
+    /** State routes (Order=3) */
+    @Bean
+    @Order(3)
     public RouterFunction<ServerResponse> stateRoutes() {
         return route("state-service-routes")
                 .route(RequestPredicates.path("/api/**"), http())
@@ -58,9 +67,9 @@ public class RoutesConfig {
                 .build();
     }
 
-    /** UI application routes + auth + OAuth2 (Order=3) */
+    /** UI application routes + auth + OAuth2 (Order=4) */
     @Bean
-    @Order(3)
+    @Order(4)
     public RouterFunction<ServerResponse> uiRoutes() {
         return route("ui-service-routes")
                 .route(
@@ -79,9 +88,9 @@ public class RoutesConfig {
                 .build();
     }
 
-    /** Presentation static assets (HU-013, Order=4) */
+    /** Presentation static assets (HU-013, Order=5) */
     @Bean
-    @Order(4)
+    @Order(5)
     public RouterFunction<ServerResponse> presentationRoutes() {
         return route("presentation-routes")
                 .route(RequestPredicates.path("/presentation/**"), http())

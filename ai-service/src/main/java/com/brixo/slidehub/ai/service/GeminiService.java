@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Cliente HTTP para Google Gemini API (CLAUDE.md §9.1, PLAN-EXPANSION.md Fase 3).
+ * Cliente HTTP para Google Gemini API (CLAUDE.md §9.1, PLAN-EXPANSION.md Fase
+ * 3).
  *
  * Integración exclusivamente vía HTTP / WebClient — sin SDK de Google.
  * Modelo: gemini-1.5-flash (soporta texto + visión multimodal).
@@ -52,17 +53,13 @@ public class GeminiService {
                         "parts", List.of(
                                 Map.of("inlineData", Map.of(
                                         "mimeType", "image/png",
-                                        "data", base64
-                                )),
+                                        "data", base64)),
                                 Map.of("text",
                                         "Analiza esta diapositiva de presentación. "
-                                        + "¿Cuál es el tema principal? ¿Qué conceptos técnicos se muestran? "
-                                        + "¿Qué tecnologías o herramientas se mencionan? "
-                                        + "Responde de forma concisa y estructurada en español, "
-                                        + "máximo 3-4 oraciones.")
-                        )
-                ))
-        );
+                                                + "¿Cuál es el tema principal? ¿Qué conceptos técnicos se muestran? "
+                                                + "¿Qué tecnologías o herramientas se mencionan? "
+                                                + "Responde de forma concisa y estructurada en español, "
+                                                + "máximo 3-4 oraciones.")))));
 
         try {
             String text = callGemini(requestBody);
@@ -77,12 +74,15 @@ public class GeminiService {
     // ── Extracción de contexto de repositorio ─────────────────────────────────
 
     /**
-     * Extrae contenido técnico relevante del repositorio GitHub para el contexto del
+     * Extrae contenido técnico relevante del repositorio GitHub para el contexto
+     * del
      * slide (PLAN-EXPANSION.md Fase 3, tarea 28 / CLAUDE.md §9.1).
      *
      * @param repoUrl          URL del repositorio GitHub
-     * @param slideDescription descripción del slide (generada por Vision o provista como fallback)
-     * @return resumen de puntos técnicos relevantes del repositorio, o cadena vacía si hay
+     * @param slideDescription descripción del slide (generada por Vision o provista
+     *                         como fallback)
+     * @return resumen de puntos técnicos relevantes del repositorio, o cadena vacía
+     *         si hay
      *         error
      */
     public String extractRepoContext(String repoUrl, String slideDescription) {
@@ -94,7 +94,7 @@ public class GeminiService {
         String prompt = """
                 Analiza el repositorio de GitHub en %s y extrae el contenido más relevante
                 para el siguiente tema de diapositiva: "%s"
-                
+
                 Devuelve únicamente los puntos técnicos clave en forma de lista concisa,
                 relevantes para que un presentador pueda explicar este slide con profundidad.
                 Sin introducción ni conclusión, solo los puntos directamente útiles.
@@ -102,9 +102,7 @@ public class GeminiService {
 
         var requestBody = Map.of(
                 "contents", List.of(Map.of(
-                        "parts", List.of(Map.of("text", prompt))
-                ))
-        );
+                        "parts", List.of(Map.of("text", prompt)))));
 
         try {
             String text = callGemini(requestBody);
@@ -120,7 +118,8 @@ public class GeminiService {
 
     /**
      * Análisis técnico profundo de un repositorio GitHub (Fase 3, tarea 33).
-     * Detecta lenguaje, framework, stack, arquitectura y genera un Dockerfile candidato.
+     * Detecta lenguaje, framework, stack, arquitectura y genera un Dockerfile
+     * candidato.
      *
      * @param repoUrl URL del repositorio GitHub
      * @return mapa con los campos de análisis (language, framework, technologies,
@@ -144,12 +143,9 @@ public class GeminiService {
 
         var requestBody = Map.of(
                 "contents", List.of(Map.of(
-                        "parts", List.of(Map.of("text", prompt))
-                )),
+                        "parts", List.of(Map.of("text", prompt)))),
                 "generationConfig", Map.of(
-                        "responseMimeType", "application/json"
-                )
-        );
+                        "responseMimeType", "application/json"));
 
         try {
             String rawJson = callGemini(requestBody);
@@ -184,8 +180,7 @@ public class GeminiService {
                     "summary", "No se pudo analizar el repositorio.",
                     "structure", "",
                     "deploymentHints", "",
-                    "dockerfile", ""
-            );
+                    "dockerfile", "");
         }
     }
 
@@ -211,9 +206,7 @@ public class GeminiService {
 
         var requestBody = Map.of(
                 "contents", List.of(Map.of(
-                        "parts", List.of(Map.of("text", prompt))
-                ))
-        );
+                        "parts", List.of(Map.of("text", prompt)))));
 
         try {
             return callGemini(requestBody);
@@ -246,13 +239,17 @@ public class GeminiService {
 
     @SuppressWarnings("unchecked")
     private String extractTextFromResponse(Map<?, ?> response) {
-        if (response == null) return "";
+        if (response == null)
+            return "";
         List<?> candidates = (List<?>) response.get("candidates");
-        if (candidates == null || candidates.isEmpty()) return "";
+        if (candidates == null || candidates.isEmpty())
+            return "";
         Map<?, ?> content = (Map<?, ?>) ((Map<?, ?>) candidates.get(0)).get("content");
-        if (content == null) return "";
+        if (content == null)
+            return "";
         List<?> parts = (List<?>) content.get("parts");
-        if (parts == null || parts.isEmpty()) return "";
+        if (parts == null || parts.isEmpty())
+            return "";
         Object text = ((Map<?, ?>) parts.get(0)).get("text");
         return text != null ? text.toString() : "";
     }
@@ -262,7 +259,8 @@ public class GeminiService {
      * Convierte {@code ```json\n...\n```} en el JSON puro.
      */
     private String stripMarkdownJson(String text) {
-        if (text == null) return "";
+        if (text == null)
+            return "";
         text = text.strip();
         if (text.startsWith("```json")) {
             text = text.substring(7);

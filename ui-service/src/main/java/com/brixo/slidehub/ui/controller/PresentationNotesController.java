@@ -24,7 +24,8 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Controller de generación de notas del presentador con IA (PLAN-EXPANSION.md Fase 3,
+ * Controller de generación de notas del presentador con IA (PLAN-EXPANSION.md
+ * Fase 3,
  * tareas 35).
  *
  * Actúa como puente entre ui-service (datos de presentación en PostgreSQL)
@@ -88,7 +89,8 @@ public class PresentationNotesController {
      * 4. Devuelve número de notas generadas
      *
      * @param id      ID de la presentación
-     * @param repoUrl URL del repositorio (opcional; si en blanco, usa el guardado en la presentación)
+     * @param repoUrl URL del repositorio (opcional; si en blanco, usa el guardado
+     *                en la presentación)
      */
     @PostMapping("/api/presentations/{id}/generate-notes")
     @ResponseBody
@@ -108,7 +110,8 @@ public class PresentationNotesController {
 
         // Prioridad: param repoUrl → guardado en la presentación
         String effectiveRepoUrl = (repoUrl != null && !repoUrl.isBlank())
-                ? repoUrl : presentation.getRepoUrl();
+                ? repoUrl
+                : presentation.getRepoUrl();
 
         if (presentation.getSlides().isEmpty()) {
             return ResponseEntity.badRequest()
@@ -130,8 +133,7 @@ public class PresentationNotesController {
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "notesGenerated", generated,
-                    "totalSlides", presentation.getSlides().size()
-            ));
+                    "totalSlides", presentation.getSlides().size()));
         } catch (Exception e) {
             log.error("Error generando notas para presentación {}: {}", id, e.getMessage());
             return ResponseEntity.internalServerError()
@@ -159,7 +161,8 @@ public class PresentationNotesController {
     }
 
     /**
-     * Analiza el repositorio asociado a la presentación y devuelve metadatos técnicos.
+     * Analiza el repositorio asociado a la presentación y devuelve metadatos
+     * técnicos.
      *
      * @param id ID de la presentación
      */
@@ -186,7 +189,6 @@ public class PresentationNotesController {
     private User resolveUser(Authentication authentication) {
         String identifier = authentication.getName();
         return userRepository.findByEmail(identifier)
-                .orElseThrow(() ->
-                        new IllegalStateException("Usuario autenticado no encontrado: " + identifier));
+                .orElseThrow(() -> new IllegalStateException("Usuario autenticado no encontrado: " + identifier));
     }
 }

@@ -14,7 +14,8 @@ import java.util.Map;
  * Servicio puente entre ui-service y ai-service para generación de notas
  * (PLAN-EXPANSION.md Fase 3).
  *
- * El ui-service tiene acceso a los datos de la presentación (slides + S3 URLs) en
+ * El ui-service tiene acceso a los datos de la presentación (slides + S3 URLs)
+ * en
  * PostgreSQL. Este servicio construye la solicitud completa para ai-service,
  * incluyendo las URLs de las imágenes, y la envía vía WebClient.
  */
@@ -34,7 +35,8 @@ public class NotesBridgeService {
     // ── Generación de notas ───────────────────────────────────────────────────
 
     /**
-     * Solicita al ai-service que genere notas para todos los slides de una presentación.
+     * Solicita al ai-service que genere notas para todos los slides de una
+     * presentación.
      *
      * @param presentationId ID de la presentación
      * @param repoUrl        URL del repo GitHub (puede ser null)
@@ -46,8 +48,7 @@ public class NotesBridgeService {
         var requestBody = Map.of(
                 "presentationId", presentationId,
                 "repoUrl", repoUrl != null ? repoUrl : "",
-                "slides", slideRefs
-        );
+                "slides", slideRefs);
 
         try {
             @SuppressWarnings("unchecked")
@@ -59,7 +60,8 @@ public class NotesBridgeService {
                     .bodyToMono(Map.class)
                     .block();
 
-            if (response == null) return 0;
+            if (response == null)
+                return 0;
             Object notesGenerated = response.get("notesGenerated");
             return notesGenerated instanceof Number n ? n.intValue() : 0;
         } catch (Exception e) {
@@ -98,7 +100,8 @@ public class NotesBridgeService {
      * Solicita al ai-service un análisis técnico del repositorio.
      *
      * @param repoUrl URL del repositorio GitHub
-     * @return mapa con los campos del análisis (language, framework, technologies, etc.)
+     * @return mapa con los campos del análisis (language, framework, technologies,
+     *         etc.)
      */
     @SuppressWarnings("unchecked")
     public Map<String, Object> analyzeRepo(String repoUrl) {

@@ -44,7 +44,8 @@ public class NotesController {
      * Genera nota para un slide vía pipeline de IA:
      * Gemini Vision → Gemini repo context → Groq (HU-016, Fase 3 tarea 31).
      *
-     * @param request cuerpo con presentationId, slideNumber, repoUrl, imageData/imageUrl,
+     * @param request cuerpo con presentationId, slideNumber, repoUrl,
+     *                imageData/imageUrl,
      *                slideContext
      */
     @PostMapping("/generate")
@@ -64,7 +65,8 @@ public class NotesController {
     /**
      * Genera notas para todos los slides de una presentación (Fase 3, tarea 32).
      *
-     * @param request cuerpo con presentationId, repoUrl y lista de slides (número + URL imagen)
+     * @param request cuerpo con presentationId, repoUrl y lista de slides (número +
+     *                URL imagen)
      */
     @PostMapping("/generate-all")
     public ResponseEntity<Map<String, Object>> generateAll(

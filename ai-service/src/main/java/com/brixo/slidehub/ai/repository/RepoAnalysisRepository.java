@@ -12,7 +12,8 @@ import java.util.Optional;
 public interface RepoAnalysisRepository extends MongoRepository<RepoAnalysis, String> {
 
     /**
-     * Busca análisis previo de un repositorio para evitar llamadas repetidas a Gemini.
+     * Busca análisis previo de un repositorio para evitar llamadas repetidas a
+     * Gemini.
      */
     Optional<RepoAnalysis> findByRepoUrl(String repoUrl);
 }

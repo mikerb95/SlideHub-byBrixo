@@ -54,7 +54,8 @@ public class NotesService {
      *
      * Pipeline:
      * <ol>
-     * <li>Si hay imageData (base64) o imageUrl, analiza la imagen con Gemini Vision →
+     * <li>Si hay imageData (base64) o imageUrl, analiza la imagen con Gemini Vision
+     * →
      * descripción</li>
      * <li>Si hay repoUrl, extrae contexto técnico relevante con Gemini</li>
      * <li>Genera nota estructurada con Groq</li>
@@ -87,7 +88,8 @@ public class NotesService {
 
     /**
      * Genera notas para todos los slides de una presentación.
-     * Pausa {@value INTER_SLIDE_DELAY_MS} ms entre slides para respetar rate limits.
+     * Pausa {@value INTER_SLIDE_DELAY_MS} ms entre slides para respetar rate
+     * limits.
      *
      * @param request solicitud con presentationId, repoUrl y la lista de slides
      * @return número de notas generadas exitosamente
@@ -103,9 +105,9 @@ public class NotesService {
                         request.presentationId(),
                         slide.slideNumber(),
                         request.repoUrl(),
-                        null,            // imageData: null; se descargará desde imageUrl
+                        null, // imageData: null; se descargará desde imageUrl
                         slide.imageUrl(),
-                        null             // slideContext: null (se usará la imagen)
+                        null // slideContext: null (se usará la imagen)
                 );
                 generate(noteRequest);
                 generated++;
@@ -134,7 +136,8 @@ public class NotesService {
     // ── Helpers privados ──────────────────────────────────────────────────────
 
     /**
-     * Determina la descripción textual del slide a partir de los parámetros disponibles.
+     * Determina la descripción textual del slide a partir de los parámetros
+     * disponibles.
      * Prioridad: imagen (base64 o URL) > slideContext (texto).
      */
     private String resolveSlideDescription(GenerateNoteRequest request) {
@@ -142,7 +145,8 @@ public class NotesService {
         if (request.imageData() != null && !request.imageData().isBlank()) {
             byte[] imageBytes = Base64.getDecoder().decode(request.imageData());
             String description = geminiService.analyzeSlideImage(imageBytes);
-            if (!description.isBlank()) return description;
+            if (!description.isBlank())
+                return description;
         }
 
         // Caso 2: URL de imagen (S3) para descarga
@@ -150,7 +154,8 @@ public class NotesService {
             byte[] imageBytes = downloadImage(request.imageUrl());
             if (imageBytes.length > 0) {
                 String description = geminiService.analyzeSlideImage(imageBytes);
-                if (!description.isBlank()) return description;
+                if (!description.isBlank())
+                    return description;
             }
         }
 
@@ -180,13 +185,14 @@ public class NotesService {
     }
 
     /**
-     * Guarda o actualiza la nota en MongoDB (upsert por presentationId + slideNumber).
+     * Guarda o actualiza la nota en MongoDB (upsert por presentationId +
+     * slideNumber).
      * Si ya existe una nota para ese slide, sobreescribe su contenido (HU-016 §2).
      */
     private PresenterNote saveOrUpdate(String presentationId, int slideNumber,
             NoteContent content) {
-        Optional<PresenterNote> existing =
-                noteRepository.findByPresentationIdAndSlideNumber(presentationId, slideNumber);
+        Optional<PresenterNote> existing = noteRepository.findByPresentationIdAndSlideNumber(presentationId,
+                slideNumber);
 
         PresenterNote note = existing.orElseGet(PresenterNote::new);
         // Preserva el _id si existe, para que MongoDB haga un update en lugar de insert

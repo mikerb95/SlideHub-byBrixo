@@ -13,11 +13,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Cliente HTTP para Groq API — generación de notas del presentador (CLAUDE.md §9.2,
+ * Cliente HTTP para Groq API — generación de notas del presentador (CLAUDE.md
+ * §9.2,
  * PLAN-EXPANSION.md Fase 3, tarea 29).
  *
  * Integración exclusivamente vía HTTP / WebClient — sin SDK de Groq.
- * Usa la API compatible con OpenAI de Groq: {@code POST /openai/v1/chat/completions}.
+ * Usa la API compatible con OpenAI de Groq:
+ * {@code POST /openai/v1/chat/completions}.
  */
 @Service
 public class GroqService {
@@ -61,12 +63,10 @@ public class GroqService {
                         Map.of("role", "system",
                                 "content",
                                 "Eres un asistente que genera notas de presentación en español. "
-                                + "Responde SIEMPRE en JSON válido, sin markdown ni texto adicional."),
-                        Map.of("role", "user", "content", prompt)
-                ),
+                                        + "Responde SIEMPRE en JSON válido, sin markdown ni texto adicional."),
+                        Map.of("role", "user", "content", prompt)),
                 "temperature", 0.7,
-                "max_tokens", 1024
-        );
+                "max_tokens", 1024);
 
         try {
             Map<?, ?> response = groqClient.post()
@@ -92,8 +92,7 @@ public class GroqService {
                     List.of("No se pudo generar la nota con IA. " + e.getMessage()),
                     "~2 min",
                     List.of(),
-                    List.of()
-            );
+                    List.of());
         }
     }
 
@@ -126,20 +125,25 @@ public class GroqService {
 
     @SuppressWarnings("unchecked")
     private String extractMessageContent(Map<?, ?> response) {
-        if (response == null) return "{}";
+        if (response == null)
+            return "{}";
         List<?> choices = (List<?>) response.get("choices");
-        if (choices == null || choices.isEmpty()) return "{}";
+        if (choices == null || choices.isEmpty())
+            return "{}";
         Map<?, ?> message = (Map<?, ?>) ((Map<?, ?>) choices.get(0)).get("message");
-        if (message == null) return "{}";
+        if (message == null)
+            return "{}";
         Object content = message.get("content");
         return content != null ? content.toString() : "{}";
     }
 
     /**
-     * Elimina los marcadores de bloque de código Markdown que los LLMs a veces añaden.
+     * Elimina los marcadores de bloque de código Markdown que los LLMs a veces
+     * añaden.
      */
     private String stripMarkdownJson(String text) {
-        if (text == null) return "{}";
+        if (text == null)
+            return "{}";
         text = text.strip();
         if (text.startsWith("```json")) {
             text = text.substring(7);

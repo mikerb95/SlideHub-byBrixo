@@ -14,11 +14,13 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Servicio de análisis de repositorios GitHub con Gemini (PLAN-EXPANSION.md Fase 3,
+ * Servicio de análisis de repositorios GitHub con Gemini (PLAN-EXPANSION.md
+ * Fase 3,
  * tarea 33).
  *
  * Cachea los resultados en MongoDB para evitar llamadas repetidas a la API.
- * El análisis incluye: lenguaje, framework, tecnologías, build system, arquitectura,
+ * El análisis incluye: lenguaje, framework, tecnologías, build system,
+ * arquitectura,
  * hints de deployment y Dockerfile candidato.
  */
 @Service
@@ -84,7 +86,8 @@ public class RepoAnalysisService {
 
     /**
      * Parsea el JSON devuelto por Gemini en un objeto {@link RepoAnalysis}.
-     * Si el parsing falla, devuelve un RepoAnalysis con datos parciales y loguea el error.
+     * Si el parsing falla, devuelve un RepoAnalysis con datos parciales y loguea el
+     * error.
      */
     private RepoAnalysis parseGeminiResponse(String rawJson, String repoUrl) {
         RepoAnalysis analysis = new RepoAnalysis();
@@ -129,7 +132,8 @@ public class RepoAnalysisService {
             return list;
         }
         for (JsonNode item : arrayNode) {
-            if (item.isTextual()) list.add(item.asText());
+            if (item.isTextual())
+                list.add(item.asText());
         }
         return list;
     }

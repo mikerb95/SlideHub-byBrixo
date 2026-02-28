@@ -7,8 +7,10 @@ package com.brixo.slidehub.ai.model;
  * @param slideNumber    Número de slide (1-based)
  * @param repoUrl        URL del repositorio GitHub (puede ser null)
  * @param imageData      Imagen del slide codificada en Base64 (puede ser null)
- * @param imageUrl       URL pública de la imagen en S3 (alternativa a imageData; puede ser null)
- * @param slideContext   Descripción breve del slide como fallback si no hay imagen
+ * @param imageUrl       URL pública de la imagen en S3 (alternativa a
+ *                       imageData; puede ser null)
+ * @param slideContext   Descripción breve del slide como fallback si no hay
+ *                       imagen
  */
 public record GenerateNoteRequest(
         String presentationId,
@@ -16,5 +18,5 @@ public record GenerateNoteRequest(
         String repoUrl,
         String imageData,
         String imageUrl,
-        String slideContext
-) {}
+        String slideContext) {
+}
