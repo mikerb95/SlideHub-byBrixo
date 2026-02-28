@@ -81,4 +81,13 @@ public class PresenterNote {
     public List<String> getDemoTags() {
         return demoTags;
     }
+
+    // Setters necesarios para upsert (CLAUDE.md §10.3)
+    public void setPresentationId(String presentationId) { this.presentationId = presentationId; }
+    public void setSlideNumber(int slideNumber) { this.slideNumber = slideNumber; }
+    public void setTitle(String title) { this.title = title; }
+    public void setPoints(List<String> points) { this.points = points; }
+    public void setSuggestedTime(String suggestedTime) { this.suggestedTime = suggestedTime; }
+    public void setKeyPhrases(List<String> keyPhrases) { this.keyPhrases = keyPhrases; }
+    public void setDemoTags(List<String> demoTags) { this.demoTags = demoTags; }
 }

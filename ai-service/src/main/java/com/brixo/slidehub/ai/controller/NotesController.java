@@ -1,7 +1,10 @@
 package com.brixo.slidehub.ai.controller;
 
+import com.brixo.slidehub.ai.model.GenerateAllRequest;
+import com.brixo.slidehub.ai.model.GenerateNoteRequest;
 import com.brixo.slidehub.ai.model.PresenterNote;
 import com.brixo.slidehub.ai.repository.PresenterNoteRepository;
+import com.brixo.slidehub.ai.service.NotesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +16,7 @@ import java.util.Map;
 /**
  * Controller de notas del presentador (HU-016, HU-017, HU-018, HU-019, HU-020).
  *
- * Fase 0: implementa solo endpoints de lectura/borrado con MongoDB.
- * Fase 2 añadirá GeminiService + GroqService para el endpoint generate.
+ * Fase 3: implementa pipeline completo Gemini Vision + Gemini repo + Groq.
  */
 @RestController
 @RequestMapping("/api/ai/notes")
@@ -23,9 +25,11 @@ public class NotesController {
     private static final Logger log = LoggerFactory.getLogger(NotesController.class);
 
     private final PresenterNoteRepository repository;
+    private final NotesService notesService;
 
-    public NotesController(PresenterNoteRepository repository) {
+    public NotesController(PresenterNoteRepository repository, NotesService notesService) {
         this.repository = repository;
+        this.notesService = notesService;
     }
 
     /**
@@ -37,16 +41,42 @@ public class NotesController {
     }
 
     /**
-     * Genera nota para un slide vía IA (HU-016).
-     * Fase 0: devuelve 501 Not Implemented — se implementará en Fase 2 con Gemini +
-     * Groq.
+     * Genera nota para un slide vía pipeline de IA:
+     * Gemini Vision → Gemini repo context → Groq (HU-016, Fase 3 tarea 31).
+     *
+     * @param request cuerpo con presentationId, slideNumber, repoUrl, imageData/imageUrl,
+     *                slideContext
      */
     @PostMapping("/generate")
-    public ResponseEntity<Map<String, Object>> generate(@RequestBody Map<String, Object> request) {
-        log.info("generate() invocado — Gemini+Groq pendientes de Fase 2. Payload: {}", request);
-        return ResponseEntity.status(501)
-                .body(Map.of("success", false, "errorMessage",
-                        "Generación de notas con IA disponible en Fase 2."));
+    public ResponseEntity<Map<String, Object>> generate(
+            @RequestBody GenerateNoteRequest request) {
+        try {
+            PresenterNote note = notesService.generate(request);
+            return ResponseEntity.ok(Map.of("success", true, "note", note));
+        } catch (Exception e) {
+            log.error("Error generando nota para slide {}: {}",
+                    request.slideNumber(), e.getMessage());
+            return ResponseEntity.ok(
+                    Map.of("success", false, "errorMessage", e.getMessage()));
+        }
+    }
+
+    /**
+     * Genera notas para todos los slides de una presentación (Fase 3, tarea 32).
+     *
+     * @param request cuerpo con presentationId, repoUrl y lista de slides (número + URL imagen)
+     */
+    @PostMapping("/generate-all")
+    public ResponseEntity<Map<String, Object>> generateAll(
+            @RequestBody GenerateAllRequest request) {
+        try {
+            int generated = notesService.generateAll(request);
+            return ResponseEntity.ok(Map.of("success", true, "notesGenerated", generated));
+        } catch (Exception e) {
+            log.error("Error en generate-all para {}: {}", request.presentationId(), e.getMessage());
+            return ResponseEntity.ok(
+                    Map.of("success", false, "errorMessage", e.getMessage()));
+        }
     }
 
     /**
