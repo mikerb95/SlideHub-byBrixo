@@ -8,19 +8,35 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        body { background: #0d1117; color: #e6edf3; min-height: 100vh; }
-
-        .topbar {
-            position: sticky; top: 0; z-index: 100;
-            background: #161b22; border-bottom: 1px solid #30363d;
-            padding: 0.6rem 1rem;
-            display: flex; align-items: center; gap: 0.5rem;
+        body {
+            background: #0d1117;
+            color: #e6edf3;
+            min-height: 100vh;
         }
 
-        .layout { display: flex; height: calc(100vh - 52px); }
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 0.6rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .layout {
+            display: flex;
+            height: calc(100vh - 52px);
+        }
 
         /* Grid de slides */
-        .slide-area { flex: 1; overflow-y: auto; padding: 1rem; }
+        .slide-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
 
         .slide-grid {
             display: grid;
@@ -29,45 +45,123 @@
         }
 
         .slide-thumb {
-            background: #161b22; border: 2px solid #30363d;
-            border-radius: 6px; overflow: hidden; cursor: pointer;
+            background: #161b22;
+            border: 2px solid #30363d;
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
             transition: border-color 0.15s, transform 0.1s;
         }
-        .slide-thumb:hover { border-color: #58a6ff; transform: translateY(-2px); }
-        .slide-thumb.active { border-color: #3fb950; }
-        .slide-thumb img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
-        .slide-thumb .slide-num { text-align: center; padding: 0.2rem; font-size: 0.75rem; opacity: 0.6; }
+
+        .slide-thumb:hover {
+            border-color: #58a6ff;
+            transform: translateY(-2px);
+        }
+
+        .slide-thumb.active {
+            border-color: #3fb950;
+        }
+
+        .slide-thumb img {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            display: block;
+        }
+
+        .slide-thumb .slide-num {
+            text-align: center;
+            padding: 0.2rem;
+            font-size: 0.75rem;
+            opacity: 0.6;
+        }
 
         /* Sidebar */
         .sidebar {
-            width: 300px; min-width: 260px;
-            background: #161b22; border-left: 1px solid #30363d;
-            display: flex; flex-direction: column;
+            width: 300px;
+            min-width: 260px;
+            background: #161b22;
+            border-left: 1px solid #30363d;
+            display: flex;
+            flex-direction: column;
             overflow-y: auto;
         }
-        .sidebar-section { padding: 0.75rem 1rem; border-bottom: 1px solid #21262d; }
-        .sidebar-section h6 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #8b949e; margin-bottom: 0.5rem; }
+
+        .sidebar-section {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #21262d;
+        }
+
+        .sidebar-section h6 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #8b949e;
+            margin-bottom: 0.5rem;
+        }
 
         .quick-link-btn {
-            display: flex; align-items: center; gap: 0.5rem;
-            background: #0d1117; border: 1px solid #30363d;
-            color: #e6edf3; border-radius: 6px;
-            padding: 0.5rem 0.75rem; width: 100%; text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: #e6edf3;
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            width: 100%;
+            text-align: left;
             transition: background 0.15s, border-color 0.15s;
-            font-size: 0.85rem; cursor: pointer;
+            font-size: 0.85rem;
+            cursor: pointer;
         }
-        .quick-link-btn:hover { background: #1f2428; border-color: #58a6ff; color: #58a6ff; }
-        .quick-link-btn.active-demo { border-color: #f78166; color: #f78166; }
-        .quick-link-btn .link-desc { font-size: 0.7rem; opacity: 0.6; display: block; }
+
+        .quick-link-btn:hover {
+            background: #1f2428;
+            border-color: #58a6ff;
+            color: #58a6ff;
+        }
+
+        .quick-link-btn.active-demo {
+            border-color: #f78166;
+            color: #f78166;
+        }
+
+        .quick-link-btn .link-desc {
+            font-size: 0.7rem;
+            opacity: 0.6;
+            display: block;
+        }
 
         /* Modal CRUD */
-        #links-modal .modal-content { background: #161b22; border: 1px solid #30363d; color: #e6edf3; }
-        #links-modal .modal-header { border-bottom-color: #30363d; }
-        #links-modal .modal-footer { border-top-color: #30363d; }
-        #links-modal .form-control, #links-modal .form-select {
-            background: #0d1117; border-color: #30363d; color: #e6edf3;
+        #links-modal .modal-content {
+            background: #161b22;
+            border: 1px solid #30363d;
+            color: #e6edf3;
         }
-        .link-item { background: #0d1117; border: 1px solid #21262d; border-radius: 6px; padding: 0.5rem 0.75rem; margin-bottom: 0.5rem; }
+
+        #links-modal .modal-header {
+            border-bottom-color: #30363d;
+        }
+
+        #links-modal .modal-footer {
+            border-top-color: #30363d;
+        }
+
+        #links-modal .form-control,
+        #links-modal .form-select {
+            background: #0d1117;
+            border-color: #30363d;
+            color: #e6edf3;
+        }
+
+        .link-item {
+            background: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 0.5rem;
+        }
     </style>
 </head>
 
@@ -106,8 +200,8 @@
                     </button>
                 </div>
                 <div class="input-group input-group-sm mb-1">
-                    <input type="url" class="form-control bg-dark text-light border-secondary"
-                        id="demo-url-input" placeholder="https://mi-demo.com">
+                    <input type="url" class="form-control bg-dark text-light border-secondary" id="demo-url-input"
+                        placeholder="https://mi-demo.com">
                     <button class="btn btn-outline-info" id="btn-demo-url">
                         <i class="fa fa-arrow-up-right-from-square"></i>
                     </button>
@@ -121,39 +215,34 @@
             <div class="sidebar-section flex-grow-1">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h6 class="mb-0"><i class="fa fa-bolt me-1"></i>Quick Links</h6>
-                    <button th:if="${presentationId != ''}"
-                            class="btn btn-sm btn-outline-secondary py-0 px-2"
-                            style="font-size:0.7rem;"
-                            data-bs-toggle="modal" data-bs-target="#links-modal">
+                    <button th:if="${presentationId != ''}" class="btn btn-sm btn-outline-secondary py-0 px-2"
+                        style="font-size:0.7rem;" data-bs-toggle="modal" data-bs-target="#links-modal">
                         <i class="fa fa-pencil"></i> Editar
                     </button>
                 </div>
 
                 <!-- Inyectado server-side desde Thymeleaf -->
                 <div id="quick-links-list">
-                    <div th:if="${quickLinks.isEmpty()}" class="text-center" style="color:#8b949e; font-size:0.8rem; padding: 1rem 0;">
+                    <div th:if="${quickLinks.isEmpty()}" class="text-center"
+                        style="color:#8b949e; font-size:0.8rem; padding: 1rem 0;">
                         <span th:if="${presentationId == ''}">
                             Abre esta vista con <code>?presentationId=...</code>
                         </span>
                         <span th:if="${presentationId != ''}">
                             Sin links configurados.
                             <a href="#" data-bs-toggle="modal" data-bs-target="#links-modal"
-                               class="text-info">Añadir</a>
+                                class="text-info">Añadir</a>
                         </span>
                     </div>
 
-                    <button th:each="link : ${quickLinks}"
-                            th:data-url="${link.url}"
-                            th:data-title="${link.title}"
-                            class="quick-link-btn mb-2"
-                            onclick="activateDemoLink(this.dataset.url, this.dataset.title)">
+                    <button th:each="link : ${quickLinks}" th:data-url="${link.url}" th:data-title="${link.title}"
+                        class="quick-link-btn mb-2" onclick="activateDemoLink(this.dataset.url, this.dataset.title)">
                         <i th:if="${link.icon != null}" th:class="${link.icon} + ' fa-fw'"></i>
                         <i th:if="${link.icon == null}" class="fa fa-link fa-fw"></i>
                         <span>
                             <span th:text="${link.title}">Título</span>
-                            <span th:if="${link.description != null}"
-                                  th:text="${link.description}"
-                                  class="link-desc"></span>
+                            <span th:if="${link.description != null}" th:text="${link.description}"
+                                class="link-desc"></span>
                         </span>
                     </button>
                 </div>
@@ -183,10 +272,11 @@
                         </div>
                         <div class="col-md-4">
                             <input type="text" class="form-control" id="new-link-icon"
-                                   placeholder="Icono FA (ej. fa-brands fa-github)">
+                                placeholder="Icono FA (ej. fa-brands fa-github)">
                         </div>
                         <div class="col-md-8">
-                            <input type="text" class="form-control" id="new-link-desc" placeholder="Descripción (opcional)">
+                            <input type="text" class="form-control" id="new-link-desc"
+                                placeholder="Descripción (opcional)">
                         </div>
                     </div>
                 </div>
@@ -356,7 +446,7 @@
                     body: JSON.stringify({ title, url, icon, description })
                 });
                 if (res.ok) {
-                    ['new-link-title','new-link-url','new-link-icon','new-link-desc']
+                    ['new-link-title', 'new-link-url', 'new-link-icon', 'new-link-desc']
                         .forEach(id => document.getElementById(id).value = '');
                     await loadLinksModal();
                     // Recargar la página para reflejar los links nuevos en el sidebar
@@ -381,4 +471,5 @@
         setInterval(fetchState, POLL_INTERVAL_MS);
     </script>
 </body>
+
 </html>
