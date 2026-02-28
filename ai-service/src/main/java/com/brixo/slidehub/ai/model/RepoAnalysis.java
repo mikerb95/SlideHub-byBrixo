@@ -52,6 +52,15 @@ public class RepoAnalysis {
     /** Contenido de un Dockerfile candidato para este proyecto. */
     private String dockerfile;
 
+    /** Puertos expuestos por la aplicación (p.ej. [8080, 8081]). */
+    private List<Integer> ports;
+
+    /** Variables de entorno requeridas (p.ej. ["DATABASE_URL", "REDIS_HOST"]). */
+    private List<String> environment;
+
+    /** Bases de datos utilizadas (p.ej. ["PostgreSQL", "Redis", "MongoDB"]). */
+    private List<String> databases;
+
     // ── Constructores ─────────────────────────────────────────────────────────
 
     public RepoAnalysis() {
@@ -145,5 +154,29 @@ public class RepoAnalysis {
 
     public void setDockerfile(String dockerfile) {
         this.dockerfile = dockerfile;
+    }
+
+    public List<Integer> getPorts() {
+        return ports;
+    }
+
+    public void setPorts(List<Integer> ports) {
+        this.ports = ports;
+    }
+
+    public List<String> getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(List<String> environment) {
+        this.environment = environment;
+    }
+
+    public List<String> getDatabases() {
+        return databases;
+    }
+
+    public void setDatabases(List<String> databases) {
+        this.databases = databases;
     }
 }

@@ -99,6 +99,9 @@ public class RepoAnalysisService {
             analysis.setFramework(textOrDefault(root, "framework", "Desconocido"));
             analysis.setTechnologies(toStringList(root.path("technologies")));
             analysis.setBuildSystem(textOrDefault(root, "buildSystem", "Desconocido"));
+            analysis.setPorts(toIntegerList(root.path("ports")));
+            analysis.setEnvironment(toStringList(root.path("environment")));
+            analysis.setDatabases(toStringList(root.path("databases")));
             analysis.setSummary(textOrDefault(root, "summary", ""));
             analysis.setStructure(textOrDefault(root, "structure", ""));
             analysis.setDeploymentHints(textOrDefault(root, "deploymentHints", ""));
@@ -112,6 +115,9 @@ public class RepoAnalysisService {
             analysis.setFramework("Desconocido");
             analysis.setTechnologies(List.of());
             analysis.setBuildSystem("Desconocido");
+            analysis.setPorts(List.of());
+            analysis.setEnvironment(List.of());
+            analysis.setDatabases(List.of());
             analysis.setSummary("Error al parsear análisis: " + rawJson);
             analysis.setStructure("");
             analysis.setDeploymentHints("");
@@ -119,6 +125,18 @@ public class RepoAnalysisService {
         }
 
         return analysis;
+    }
+
+    private java.util.List<Integer> toIntegerList(JsonNode arrayNode) {
+        java.util.List<Integer> list = new ArrayList<>();
+        if (arrayNode == null || arrayNode.isMissingNode() || !arrayNode.isArray()) {
+            return list;
+        }
+        for (JsonNode item : arrayNode) {
+            if (item.isNumber())
+                list.add(item.asInt());
+        }
+        return list;
     }
 
     private String textOrDefault(JsonNode root, String field, String defaultValue) {

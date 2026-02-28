@@ -134,6 +134,9 @@ public class GeminiService {
                   "framework": "Framework principal (Spring Boot, Laravel, Next.js, Django, etc.)",
                   "technologies": ["lista", "de", "tecnologías", "y", "librerías"],
                   "buildSystem": "Maven | Gradle | npm | Composer | pip | etc.",
+                  "ports": [8080],
+                  "environment": ["DATABASE_URL", "REDIS_HOST"],
+                  "databases": ["PostgreSQL", "Redis"],
                   "summary": "Resumen de 1-2 oraciones del propósito del proyecto.",
                   "structure": "Descripción de la arquitectura (microservicios, MVC, monolito, etc.).",
                   "deploymentHints": "Recomendaciones para desplegar en Render, Vercel o Railway.",
@@ -179,10 +182,13 @@ public class GeminiService {
                   "framework": "Framework principal (Spring Boot, Laravel, Next.js, Django, etc.)",
                   "technologies": ["lista", "de", "tecnologías"],
                   "buildSystem": "Maven | Gradle | npm | Composer | pip | etc.",
+                  "ports": [8080],
+                  "environment": ["DATABASE_URL", "REDIS_HOST"],
+                  "databases": ["PostgreSQL", "Redis"],
                   "summary": "Resumen de 1-2 oraciones del propósito del proyecto.",
-                  "structure": "Descripción de la arquitectura.",
+                  "structure": "Descripción de la arquitectura (microservicios, MVC, monolito, etc.).",
                   "deploymentHints": "Recomendaciones para desplegar en Render / Vercel / Railway.",
-                  "dockerfile": "Contenido completo de un Dockerfile apropiado."
+                  "dockerfile": "Contenido completo de un Dockerfile apropiado para este proyecto."
                 }
                 """.formatted(repoUrl);
 
