@@ -14,8 +14,12 @@ Es la reescritura de un módulo PHP/CodeIgniter 4 documentado en
 **Stack actual:**
 - Spring Boot 4.0.3 / Spring Cloud 2025.1.0 / Java 21
 - Maven multi-módulo (4 servicios creados en Fase 0)
-- Redis (estado en memoria), MongoDB (notas IA), Thymeleaf (UI), Spring Security (auth), Spring Cloud Gateway (enrutamiento)
+- Redis (estado en memoria), MongoDB (notas IA + deploy guides), PostgreSQL/JPA (usuarios, presentaciones), Thymeleaf (UI), Spring Security (auth local + OAuth2), Spring Cloud Gateway (enrutamiento)
 - 4 microservicios: `state-service` (8081), `ui-service` (8082), `ai-service` (8083), `gateway-service` (8080)
+- **OAuth2:** GitHub + Google coexisten con login local; tokens en PostgreSQL
+- **Google Drive:** Google Drive REST API v3 vía `WebClient` (sin SDK)
+- **Gemini Vision:** analiza visualmente slides PNG para notas del presentador
+- **Deploy Tutor:** `ai-service` genera Dockerfiles y guías de despliegue vía Gemini + Groq
 - **Despliegue:** Render (un Web Service por microservicio)
 - **Emails:** Resend API vía HTTP (`WebClient`) — sin JavaMail ni SDKs
 - **Assets de usuario:** Amazon S3 (AWS SDK v2)
@@ -209,12 +213,15 @@ No copiar todas las dependencias del parent a cada hijo.
 | Servicio          | Dependencias clave                                                                              |
 |-------------------|-------------------------------------------------------------------------------------------------|
 | `state-service`   | `web`, `data-redis`, `actuator`                                                                 |
-| `ui-service`      | `web`, `thymeleaf`, `thymeleaf-extras-springsecurity6`, `security`, `webflux`, `actuator`, `software.amazon.awssdk:s3` |
+| `ui-service`      | `web`, `thymeleaf`, `thymeleaf-extras-springsecurity6`, `security`, `oauth2-client`, `webflux`, `data-jpa`, `postgresql`, `flyway-core`, `actuator`, `software.amazon.awssdk:s3` |
 | `ai-service`      | `web`, `data-mongodb`, `webflux` (solo WebClient), `actuator`                                   |
 | `gateway-service` | `spring-cloud-gateway-server-webmvc`, `config-server`, `actuator`                               |
 
 > **AWS SDK v2** (`software.amazon.awssdk:s3`) es una excepción justificada al patrón WebClient-only:
 > S3 requiere firma SigV4 que el SDK maneja automáticamente. Solo en `ui-service`.
+>
+> **Jackson en `ai-service`** usa `tools.jackson.databind.*` (Jackson 3.x, parte de Spring Boot 4).
+> En `ui-service` se usa `com.fasterxml.jackson.annotation.*` (Jackson 2.x). No mezclar.
 
 ---
 
@@ -249,6 +256,19 @@ aws.secret-access-key=${AWS_SECRET_ACCESS_KEY}
 # PostgreSQL (Fase 1+)
 spring.datasource.url=${DATABASE_URL:jdbc:postgresql://localhost:5432/slidehub}
 spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.hibernate.ddl-auto=validate
+spring.flyway.enabled=true
+# OAuth2 — GitHub
+spring.security.oauth2.client.registration.github.client-id=${GITHUB_CLIENT_ID}
+spring.security.oauth2.client.registration.github.client-secret=${GITHUB_CLIENT_SECRET}
+spring.security.oauth2.client.registration.github.scope=repo,read:user,user:email
+spring.security.oauth2.client.provider.github.user-name-attribute=login
+# OAuth2 — Google
+spring.security.oauth2.client.registration.google.client-id=${GOOGLE_CLIENT_ID}
+spring.security.oauth2.client.registration.google.client-secret=${GOOGLE_CLIENT_SECRET}
+spring.security.oauth2.client.registration.google.scope=openid,profile,email,https://www.googleapis.com/auth/drive.readonly
+spring.security.oauth2.client.provider.google.user-name-attribute=email
 
 # ai-service
 spring.application.name=ai-service
@@ -314,6 +334,21 @@ spring.cloud.config.server.native.search-locations=classpath:/config-repo
 3. **Orden obligatorio:** `/api/ai/**` → `ai-service:8083` ANTES de `/api/**` → `state-service:8081`
 4. Rutas de UI → `ui-service:8082`
 5. Referencia: `AGENTS.md §2.4`
+
+### "Implementa el Deploy Tutor (`/deploy-tutor`, `/api/ai/deploy/**`)"
+
+1. **`ai-service`** — crear en `com.brixo.slidehub.ai`:
+   - `model/RepoAnalysis.java` (@Document, campos: `language`, `framework`, `buildSystem`, `ports`, `environment`, `databases`, `technologies`, `summary`, `dockerfile`)
+   - `model/DeploymentGuide.java` (@Document, compound index `repoUrl+platform`)
+   - `repository/DeploymentGuideRepository.java` — `findByRepoUrlAndPlatform()`
+   - `service/GeminiService.analyzeRepo()` + `analyzeRepoRaw()` — detecta lenguaje/ports/databases
+   - `service/GroqService.generateDockerfile()` + `generateDeploymentGuide()` — temperatura 0.4
+   - `service/DeploymentService.java` — orquesta con cache MongoDB
+   - `controller/DeployTutorController.java` — `POST /api/ai/deploy/{analyze,dockerfile,guide,guide/refresh}`
+2. **`ui-service`** — añadir en `SecurityConfig`: `/deploy-tutor` como PRESENTER/ADMIN
+3. **`ui-service`** — añadir en `PresenterViewController`: `GET /deploy-tutor` → `"deploy-tutor"`
+4. **`ui-service`** — crear `templates/deploy-tutor.html` con pipeline 3-pasos + dark theme
+5. Referencia: HU-027, HU-028, HU-029
 
 ---
 
@@ -682,7 +717,9 @@ public ResponseEntity<PresenterNote> getNote(@PathVariable String presentationId
 |-------------------------------|-------------------|
 | `/slides`, `/remote`, `/demo`, `/showcase` | Público (sin auth) |
 | `/auth/login`, `/auth/register` | Público          |
-| `/presenter`, `/main-panel`   | `PRESENTER` o `ADMIN` |
+| `/presenter`, `/main-panel`, `/deploy-tutor` | `PRESENTER` o `ADMIN` |
+| `/presentations/**`           | `PRESENTER` o `ADMIN` |
+| `/auth/profile`               | `PRESENTER` o `ADMIN` |
 | `/api/devices/**`             | `ADMIN`           |
 | `/api/**` (slide, demo)       | Público (dispositivos cliente) |
 
@@ -701,7 +738,8 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/presentation/**").permitAll()
                 .requestMatchers("/api/**").permitAll()    // polling de dispositivos
-                .requestMatchers("/presenter", "/main-panel").hasAnyRole("PRESENTER", "ADMIN")
+                .requestMatchers("/presenter", "/main-panel", "/deploy-tutor").hasAnyRole("PRESENTER", "ADMIN")
+                .requestMatchers("/presentations/**").hasAnyRole("PRESENTER", "ADMIN")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -710,6 +748,10 @@ public class SecurityConfig {
                 .defaultSuccessUrl("/presenter", true)
                 .failureUrl("/auth/login?error=true")
                 .permitAll()
+            )
+            .oauth2Login(oauth2 -> oauth2
+                .loginPage("/auth/login")
+                .defaultSuccessUrl("/presenter", true)
             )
             .logout(logout -> logout
                 .logoutUrl("/auth/logout")
@@ -790,8 +832,9 @@ Usar estos términos de forma consistente en código, variables y comentarios:
 | `slide`             | Número de diapositiva (int, 1-based)                         |
 | `totalSlides`       | Total de diapositivas detectadas en `static/slides/`         |
 | `currentSlide`      | La diapositiva activa actualmente                            |
-| `demoState`         | Estado del modo demo: `{ mode, slide?, url? }`               |
+| `demoState`         | Estado del modo demo: `{ mode, slide?, url?, returnSlide? }` |
 | `mode`              | `"slides"` o `"url"` — nunca otro valor                     |
+| `returnSlide`       | Slide al que volver al cerrar demo URL (nullable int)        |
 | `mainPanel`         | Panel maestro para tablet (no "control panel", no "admin")   |
 | `presenter`         | Vista del presentador con notas y timer                      |
 | `remote`            | Control remoto para smartphone                               |
@@ -803,6 +846,10 @@ Usar estos términos de forma consistente en código, variables y comentarios:
 | `slideContext`      | Descripción breve del contenido del slide enviada a Gemini   |
 | `keyPhrases`        | Frases clave destacadas en las notas del presentador         |
 | `demoTags`          | Tags que indican qué demos hacer durante el slide            |
+| `driveFolderId`     | ID de carpeta de Google Drive usado para importar slides     |
+| `quickLink`         | Link rápido desde main-panel hacia una URL de demo           |
+| `deploymentGuide`   | Guía generada por IA para desplegar un repo en una plataforma |
+| `platform`          | Plataforma de deploy objetivo: `"render"`, `"vercel"`, `"netlify"` |
 
 ---
 
@@ -815,15 +862,18 @@ Usar estos términos de forma consistente en código, variables y comentarios:
 - No crees un `DTO` separado si un `record` inmutable es suficiente.
 - No hagas `@ComponentScan` extra — Spring Boot lo hace por defecto desde el paquete base.
 - No implementes SDKs de Gemini ni Groq — toda la integración va por HTTP vía `WebClient`.
+- No uses el SDK oficial de Google Drive — toda la integración va por HTTP vía `WebClient`.
 - No hardcodees API keys — siempre `${GEMINI_API_KEY}` y `${GROQ_API_KEY}` desde environment.
 - No almacenes notas de presentador en Redis — pertenecen a MongoDB en `ai-service`.
+- No almacenes guías de deploy en Redis — pertenecen a MongoDB en `ai-service`.
 - El `PresenterNote` usa `@Document` de Spring Data MongoDB, no `record` (necesita `@Id` y mutabilidad para upsert).
 - No uses Resend SDK, JavaMail ni Spring Mail — solo llamadas HTTP a `https://api.resend.com/emails`.
 - No hardcodees credenciales AWS ni el DSN de Aiven — siempre desde variables de entorno.
 - No guardes arhivos subidos por usuarios en el filesystem local de Render — todo va a S3.
 - No uses `ddl-auto=create` ni `ddl-auto=update` en producción con Aiven — solo `validate` + migraciones Flyway.
 - No configures CORS ni headers de trust por servicio individual — centralizar en `gateway-service`.
+- No almacenes tokens OAuth2 (GitHub/Google) en texto plano en PostgreSQL — encriptar.
 
 ---
 
-*Actualizado: Febrero 2026 — v1 en elaboración*
+*Actualizado: Febrero 2026 — v1 completada (Fases 0-5)*

@@ -20,17 +20,22 @@ si hay diferencias de comportamiento.
 
 ### Propuesta de valor
 
-| Feature clave               | Descripción                                                                     |
-|-----------------------------|---------------------------------------------------------------------------------|
-| Multi-pantalla sincronizada | N pantallas se sincronizan vía REST API + polling HTTP                         |
-| Control remoto táctil       | Interfaz para smartphone con swipe y vibración háptica                         |
-| Presenter notes con IA      | Notas generadas automáticamente por Groq a partir del contenido del repo       |
-| Ingesta de repo con Gemini  | Gemini lee el repositorio de GitHub y extrae contexto por slide                |
-| Modo dual slides/URL        | La pantalla `demo` alterna entre diapositivas e iframe de cualquier URL        |
-| Panel maestro tablet        | Grid optimizado para tablet 11", thumbnails, navegación, links de demo         |
-| Autenticación por roles     | Vistas de control protegidas (PRESENTER, ADMIN); proyección y demo públicas    |
-| Registro de dispositivos    | Admin puede listar y buscar dispositivos conectados por token                  |
-| Zero-config                 | Detecta slides del directorio `static/slides/` automáticamente                |
+| Feature clave               | Descripción                                                                            |
+|-----------------------------|----------------------------------------------------------------------------------------|
+| Multi-pantalla sincronizada | N pantallas se sincronizan vía REST API + polling HTTP                                |
+| Control remoto táctil       | Interfaz para smartphone con swipe y vibración háptica                                |
+| Presenter notes con IA      | Notas generadas automáticamente por Groq a partir del contenido del repo              |
+| Ingesta de repo con Gemini  | Gemini lee el repositorio de GitHub y extrae contexto por slide                       |
+| Gemini Vision               | Analiza visualmente los slides PNG para generar notas más precisas                    |
+| Modo dual slides/URL        | La pantalla `demo` alterna entre diapositivas e iframe; `returnSlide` auto-restaura   |
+| Quick Links con returnSlide | Links rápidos de demo desde `main-panel`; vuelve al slide exacto al cerrar            |
+| Panel maestro tablet        | Grid optimizado para tablet 11", thumbnails, navegación, links de demo                |
+| Autenticación dual          | Login local (BCrypt) + OAuth2 GitHub + OAuth2 Google coexistiendo                     |
+| Importación Google Drive    | Importa slides PNG directamente desde una carpeta de Google Drive                     |
+| Gestión de presentaciones   | CRUD de presentaciones persistido en PostgreSQL; upload manual de PNGs a S3           |
+| Deploy Tutor                | Genera Dockerfile y guía de despliegue para cualquier repo usando Gemini + Groq       |
+| Registro de dispositivos    | Admin puede listar y buscar dispositivos conectados por token                         |
+| Zero-config                 | Detecta slides del directorio `static/slides/` automáticamente                        |
 
 ---
 
@@ -102,19 +107,24 @@ Cada dispositivo tiene: `name`, `type`, `token`, `lastIp`, `lastConnection`.
 
 **Vistas y acceso:**
 
-| Ruta             | Vista Thymeleaf    | Acceso    | Para                              |
-|------------------|--------------------|-----------|-----------------------------------|
-| `/slides`        | `slides.html`      | Público   | Proyector/TV fullscreen           |
-| `/remote`        | `remote.html`      | Público   | Control remoto smartphone         |
-| `/demo`          | `demo.html`        | Público   | Pantalla dual slides/iframe       |
-| `/showcase`      | `showcase.html`    | Público   | Landing page                      |
-| `/presenter`     | `presenter.html`   | PRESENTER | Laptop del presentador con notas  |
-| `/main-panel`    | `main-panel.html`  | PRESENTER | Panel maestro tablet 11"          |
-| `/auth/login`    | `login.html`       | Público   | Formulario de login               |
-| `/auth/register` | `register.html`    | Público   | Registro de nueva cuenta          |
+| Ruta                       | Vista Thymeleaf          | Acceso    | Para                                          |
+|----------------------------|--------------------------|-----------|-----------------------------------------------|
+| `/slides`                  | `slides.html`            | Público   | Proyector/TV fullscreen                       |
+| `/remote`                  | `remote.html`            | Público   | Control remoto smartphone                     |
+| `/demo`                    | `demo.html`              | Público   | Pantalla dual slides/iframe                   |
+| `/showcase`                | `showcase.html`          | Público   | Landing page                                  |
+| `/presenter`               | `presenter.html`         | PRESENTER | Laptop del presentador con notas              |
+| `/main-panel`              | `main-panel.html`        | PRESENTER | Panel maestro tablet 11"                      |
+| `/deploy-tutor`            | `deploy-tutor.html`      | PRESENTER | Generador de Dockerfiles y guías de deploy    |
+| `/presentations`           | `presentations.html`     | PRESENTER | Lista de presentaciones del usuario           |
+| `/presentations/import`    | `import.html`            | PRESENTER | Importar presentación desde Google Drive      |
+| `/auth/login`              | `login.html`             | Público   | Formulario de login local                     |
+| `/auth/register`           | `register.html`          | Público   | Registro de cuenta nueva                      |
+| `/auth/profile`            | `profile.html`           | PRESENTER | Perfil de usuario y cuentas OAuth vinculadas  |
 
-**Rutas de autenticación (HU-001, HU-002, HU-003):**
-- Login con usuario/contraseña → valida con BCrypt → crea sesión → redirige a `/presenter`
+**Rutas de autenticación (HU-001, HU-002, HU-003, HU-021, HU-022):**
+- Login local: usuario/contraseña → valida con BCrypt → crea sesión → redirige a `/presenter`
+- Login OAuth2: GitHub (`/login/oauth2/code/github`) o Google (`/login/oauth2/code/google`) → crea o vincula cuenta → redirige a `/presenter`
 - Si sesión ya activa → redirige directo a `/presenter` sin mostrar el formulario
 - Logout → invalida sesión → redirige a `/auth/login`
 - Roles: `PRESENTER` (acceso a control), `ADMIN` (además del panel de devices)
@@ -122,38 +132,51 @@ Cada dispositivo tiene: `name`, `type`, `token`, `lastIp`, `lastConnection`.
 ### 2.3 `ai-service` (Puerto 8083)
 
 **Responsabilidad única:** integración con IA externa (Gemini + Groq) y persistencia de
-notas del presentador en MongoDB.
+notas del presentador y guías de deploy en MongoDB.
 
-| Aspecto         | Decisión                                                              |
-|-----------------|-----------------------------------------------------------------------|
-| Store           | MongoDB — colección `presenter_notes`                                 |
-| API             | REST JSON, Spring WebMVC                                              |
-| IA externa      | Google Gemini (lectura de repos GitHub) + Groq (generación de notas) |
-| Sin UI          | Solo API                                                              |
+| Aspecto         | Decisión                                                                                   |
+|-----------------|--------------------------------------------------------------------------------------------|
+| Store           | MongoDB — colecciones `presenter_notes`, `repo_analysis`, `deployment_guides`             |
+| API             | REST JSON, Spring WebMVC                                                                   |
+| IA externa      | Gemini (texto: repos) + Gemini Vision (imágenes: slides) + Groq (generación de contenido) |
+| Sin UI          | Solo API                                                                                   |
 
-**Flujo de generación de notas (HU-016):**
+**Flujo de generación de notas (HU-016, HU-030):**
 
 ```
 1. Cliente envía POST /api/ai/notes/generate con { presentationId, slideNumber, repoUrl, slideContext }
-2. ai-service llama a Gemini API → extrae contenido relevante del repo de GitHub para ese slide
-3. ai-service envía ese contenido a Groq API → genera nota estructurada
-4. Nota se guarda en MongoDB: { presentationId, slideNumber, title, points[], suggestedTime, keyPhrases[], demoTags[] }
-5. Responde { success: true } o { success: false, errorMessage: "..." }
+2. ai-service llama a Gemini Vision API → analiza visualmente la imagen del slide PNG
+3. ai-service llama a Gemini API → extrae contenido relevante del repo de GitHub para ese slide
+4. ai-service envía contexto combinado a Groq API → genera nota estructurada
+5. Nota se guarda en MongoDB: { presentationId, slideNumber, title, points[], suggestedTime, keyPhrases[], demoTags[] }
+6. Responde { success: true } o { success: false, errorMessage: "..." }
 ```
 
-**Endpoints:**
+**Endpoints de notas:**
 
-| Método   | Ruta                                         | Descripción                          |
-|----------|----------------------------------------------|--------------------------------------|
-| `POST`   | `/api/ai/notes/generate`                     | Genera nota para un slide vía IA     |
-| `GET`    | `/api/ai/notes/{presentationId}`             | Lista todas las notas de una presentación |
-| `GET`    | `/api/ai/notes/{presentationId}/{slideNumber}` | Obtiene nota de un slide específico |
-| `DELETE` | `/api/ai/notes/{presentationId}`             | Elimina todas las notas de una presentación |
-| `GET`    | `/api/ai/notes/health`                       | Health check del servicio de IA      |
+| Método   | Ruta                                           | Descripción                               |
+|----------|------------------------------------------------|-------------------------------------------|
+| `POST`   | `/api/ai/notes/generate`                       | Genera nota para un slide vía IA          |
+| `GET`    | `/api/ai/notes/{presentationId}`               | Lista todas las notas de una presentación |
+| `GET`    | `/api/ai/notes/{presentationId}/{slideNumber}` | Obtiene nota de un slide específico       |
+| `DELETE` | `/api/ai/notes/{presentationId}`               | Elimina todas las notas de una presentación |
+| `GET`    | `/api/ai/notes/health`                         | Health check del servicio de IA           |
 
 > Si la nota ya existe para un slide, `generate` la **sobreescribe** (HU-016 §2).
 > `DELETE` responde `204 No Content` aunque no existan notas previas (HU-019 §2).
 > `GET /{presentationId}/{slideNumber}` responde `204 No Content` si no existe la nota (HU-018 §2).
+
+**Endpoints de Deploy Tutor:**
+
+| Método | Ruta                            | Descripción                                         |
+|--------|---------------------------------|-----------------------------------------------------|
+| `POST` | `/api/ai/deploy/analyze`        | Analiza repo con Gemini → detecta lenguaje/puertos  |
+| `POST` | `/api/ai/deploy/dockerfile`     | Genera Dockerfile optimizado con Groq               |
+| `POST` | `/api/ai/deploy/guide`          | Genera guía de despliegue (cache MongoDB)           |
+| `POST` | `/api/ai/deploy/guide/refresh`  | Regenera guía descartando el cache                  |
+
+> Los resultados de análisis (`repo_analysis`) y guías (`deployment_guides`) se cachean en MongoDB.
+> `/guide/refresh` fuerza regeneración descartando el documento cacheado.
 
 ### 2.4 `gateway-service` (Puerto 8080)
 
@@ -173,6 +196,8 @@ notas del presentador en MongoDB.
 | `/api/**`                        | `state-service:8081/api/**`         |
 | `/auth/**`                       | `ui-service:8082/auth/**`           |
 | `/slides`, `/remote`, `/presenter`, `/main-panel`, `/demo`, `/showcase` | `ui-service:8082/**` |
+| `/deploy-tutor`                  | `ui-service:8082/deploy-tutor`      |
+| `/presentations/**`              | `ui-service:8082/presentations/**`  |
 | `/presentation/**`               | `ui-service:8082/presentation/**`   |
 | `/actuator/**`                   | Endpoints internos del gateway      |
 
@@ -183,34 +208,39 @@ notas del presentador en MongoDB.
 
 ## 3. Stack Tecnológico
 
-| Capa              | Tecnología                                  | Versión / Nota               |
-|-------------------|---------------------------------------------|------------------------------|
-| Lenguaje          | Java                                        | 21 (LTS)                     |
-| Framework         | Spring Boot                                 | 4.0.3                        |
-| Cloud             | Spring Cloud                                | 2025.1.0                     |
-| UI templating     | Thymeleaf 3                                 | incluido en Boot             |
-| HTTP client       | Spring WebClient (WebFlux)                  | incluido en Boot             |
-| Cache / State     | Redis via `spring-boot-starter-data-redis`  | incluido en Boot             |
-| Base de datos IA  | MongoDB via `spring-boot-starter-mongodb`   | incluido en Boot             |
-| Autenticación     | Spring Security + BCrypt                    | `spring-boot-starter-security` |
-| Gateway           | Spring Cloud Gateway (WebMVC)               | incluido en Cloud            |
-| Config            | Spring Cloud Config Server                  | incluido en Cloud            |
-| IA — Ingesta repo | Google Gemini API                           | llamadas HTTP vía WebClient  |
-| IA — Generación   | Groq API (LLM)                              | llamadas HTTP vía WebClient  |
-| Build             | Maven (Wrapper `mvnw`)                      | —                            |
-| Testing           | JUnit 5, Spring Boot Test, MockMvc          | incluido en Boot             |
-| CSS (vistas)      | Bootstrap 5.3 + Tailwind CDN, Font Awesome 6.5 | CDN only                  |
-| JS (vistas)       | Vanilla ES6 (fetch API, DOM, polling)       | sin bundler                  |
-| Email             | Resend API                                  | llamadas HTTP vía WebClient  |
-| Storage (assets)  | Amazon S3                                   | AWS SDK v2 vía WebClient     |
-| PostgreSQL (prod) | Aiven                                       | DSN como variable de entorno |
-| Despliegue        | Render                                      | Web Services por microservicio |
+| Capa                  | Tecnología                                      | Versión / Nota                        |
+|-----------------------|-------------------------------------------------|---------------------------------------|
+| Lenguaje              | Java                                            | 21 (LTS)                              |
+| Framework             | Spring Boot                                     | 4.0.3                                 |
+| Cloud                 | Spring Cloud                                    | 2025.1.0                              |
+| UI templating         | Thymeleaf 3                                     | incluido en Boot                      |
+| HTTP client           | Spring WebClient (WebFlux)                      | incluido en Boot                      |
+| Cache / State         | Redis via `spring-boot-starter-data-redis`      | incluido en Boot                      |
+| Base de datos IA      | MongoDB via `spring-boot-starter-mongodb`       | incluido en Boot                      |
+| Base de datos app     | PostgreSQL (Aiven) via `spring-boot-starter-data-jpa` | DSN como `DATABASE_URL`         |
+| Migraciones BD        | Flyway                                          | incluido en Boot                      |
+| Autenticación local   | Spring Security + BCrypt                        | `spring-boot-starter-security`        |
+| Autenticación OAuth2  | Spring Security OAuth2 Client                   | `spring-boot-starter-oauth2-client`   |
+| Gateway               | Spring Cloud Gateway (WebMVC)                   | incluido en Cloud                     |
+| Config                | Spring Cloud Config Server                      | incluido en Cloud                     |
+| IA — Análisis repo    | Google Gemini API (texto)                       | llamadas HTTP vía WebClient           |
+| IA — Análisis visual  | Google Gemini Vision API (imágenes)             | llamadas HTTP vía WebClient           |
+| IA — Generación       | Groq API (LLM)                                  | llamadas HTTP vía WebClient           |
+| Google Drive          | Google Drive REST API v3                        | llamadas HTTP vía WebClient (sin SDK) |
+| Build                 | Maven (Wrapper `mvnw`)                          | —                                     |
+| Testing               | JUnit 5, Spring Boot Test, MockMvc              | incluido en Boot                      |
+| CSS (vistas)          | Bootstrap 5.3 + Tailwind CDN, Font Awesome 6.5  | CDN only                              |
+| JS (vistas)           | Vanilla ES6 (fetch API, DOM, polling)           | sin bundler                           |
+| Email                 | Resend API                                      | llamadas HTTP vía WebClient           |
+| Storage (assets)      | Amazon S3                                       | AWS SDK v2 — excepción justificada    |
+| Despliegue            | Render                                          | Web Services por microservicio        |
 
 > **Regla:** No añadir Lombok, MapStruct ni ninguna librería de generación de código
 > sin discutirlo primero. Preferir código explícito y legible.
 >
-> Gemini y Groq se integran **únicamente vía HTTP** (`WebClient`) — no se usan SDKs de terceros
-> para mantener control total sobre el payload y evitar dependencias pesadas.
+> Gemini, Groq y Google Drive se integran **únicamente vía HTTP** (`WebClient`) — no se usan SDKs
+> de terceros para mantener control total sobre el payload y evitar dependencias pesadas.
+> La única excepción es AWS SDK v2 para S3 (requiere firma SigV4).
 
 ---
 
@@ -233,10 +263,21 @@ Ejemplos concretos:
 - `com.brixo.slidehub.state.service.DeviceRegistryService`
 - `com.brixo.slidehub.ui.controller.PresentationViewController`
 - `com.brixo.slidehub.ui.controller.AuthController`
+- `com.brixo.slidehub.ui.service.GoogleDriveImportService`
+- `com.brixo.slidehub.ui.service.PresentationService`
+- `com.brixo.slidehub.ui.model.User`
+- `com.brixo.slidehub.ui.model.Presentation`
+- `com.brixo.slidehub.ui.model.Slide`
+- `com.brixo.slidehub.ui.model.QuickLink`
 - `com.brixo.slidehub.ai.controller.NotesController`
+- `com.brixo.slidehub.ai.controller.DeployTutorController`
 - `com.brixo.slidehub.ai.service.GeminiService`
 - `com.brixo.slidehub.ai.service.GroqService`
+- `com.brixo.slidehub.ai.service.DeploymentService`
+- `com.brixo.slidehub.ai.service.RepoAnalysisService`
 - `com.brixo.slidehub.ai.model.PresenterNote`
+- `com.brixo.slidehub.ai.model.RepoAnalysis`
+- `com.brixo.slidehub.ai.model.DeploymentGuide`
 - `com.brixo.slidehub.gateway.config.RoutesConfig`
 
 ---
@@ -300,7 +341,17 @@ Fuente canónica: [`docs/Historias de Usuario - SlideHub.csv`](<docs/Historias d
 | HU-017 | Presentador       | `GET /api/ai/notes/{presentationId}` — listar notas   | `ai-service`                     |
 | HU-018 | Vista presentador | `GET /api/ai/notes/{presentationId}/{slideNumber}`    | `ai-service`                     |
 | HU-019 | Presentador       | `DELETE /api/ai/notes/{presentationId}` — borrar notas | `ai-service`                    |
-| HU-020 | Ops               | `GET /api/ai/notes/health` + `GET /actuator/health`   | `ai-service` + todos            |
+| HU-020 | Ops               | `GET /api/ai/notes/health` + `GET /actuator/health`   | `ai-service` + todos             |
+| HU-021 | Presentador       | Login OAuth2 con GitHub                               | `ui-service` (Spring Security)   |
+| HU-022 | Presentador       | Login OAuth2 con Google                               | `ui-service` (Spring Security)   |
+| HU-023 | Presentador       | Ver y editar perfil + cuentas OAuth vinculadas        | `ui-service` (PostgreSQL)        |
+| HU-024 | Presentador       | Importar presentación (slides PNG) desde Google Drive | `ui-service` + Google Drive API  |
+| HU-025 | Presentador       | Upload manual de slides PNG a una presentación       | `ui-service` + S3                |
+| HU-026 | Presentador       | Listar y gestionar presentaciones guardadas           | `ui-service` (PostgreSQL)        |
+| HU-027 | Presentador       | `POST /api/ai/deploy/analyze` — analizar repo          | `ai-service`                     |
+| HU-028 | Presentador       | `POST /api/ai/deploy/dockerfile` — generar Dockerfile | `ai-service`                     |
+| HU-029 | Presentador       | `POST /api/ai/deploy/guide` — generar guía + cache   | `ai-service`                     |
+| HU-030 | Presentador       | Análisis visual de slides con Gemini Vision           | `ai-service`                     |
 
 **Comportamientos críticos a respetar:**
 - `GET /api/slide` siempre responde `{ "slide": N, "totalSlides": M }` — nunca solo `{ "slide": N }` (HU-008)
@@ -352,22 +403,28 @@ Secciones clave del doc de análisis por tarea:
 
 | # | Decisión                                   | Opciones                              |
 |---|---------------------------------------------|---------------------------------------|
-| 1 | Módulo `showcase` vs ruta de `ui-service`  | ¿Servicio propio o endpoint de UI?    |
-| 2 | Multi-sesión (varias presentaciones)        | Fuera de alcance v1 — no implementar |
+| 1 | Multi-sesión (varias presentaciones)        | Fuera de alcance v1 — no implementar |
 
 **Decisiones ya tomadas (no reabrir):**
 
 | Decisión                        | Resolución                                                                          |
 |---------------------------------|-------------------------------------------------------------------------------------|
 | Autenticación                   | Spring Security + BCrypt + sesiones HTTP en `ui-service`                            |
+| OAuth2                          | GitHub + Google coexistiendo con login local; tokens almacenados en PostgreSQL      |
 | Roles                           | `PRESENTER` (control) y `ADMIN` (devices + control)                                 |
 | Store de notas IA               | MongoDB en `ai-service`                                                             |
+| Store de guías deploy           | MongoDB en `ai-service` (colección `deployment_guides`)                             |
 | Integración Gemini y Groq       | HTTP puro vía `WebClient` — sin SDKs de terceros                                    |
+| Integración Google Drive        | Google Drive REST API v3 vía `WebClient` — sin SDK oficial                         |
+| Gemini Vision                   | `gemini-pro-vision` vía HTTP para análisis de slides PNG                            |
+| Deploy Tutor                    | Dentro de `ai-service` como `/api/ai/deploy/**` — no servicio separado              |
+| Módulo `showcase`               | Ruta pública de `ui-service` — no servicio propio                                   |
 | Despliegue                      | **Render** — un Web Service por microservicio                                       |
 | Envío de emails                 | **Resend API** — HTTP vía `WebClient`, sin librerías SMTP ni SDKs                  |
 | Almacenamiento de assets        | **Amazon S3** — uploads de usuarios (slides, imágenes) — AWS SDK v2                |
 | Base de datos PostgreSQL        | **Aiven** — DSN completo leído de variable de entorno `DATABASE_URL`               |
 | Persistence backend             | Redis (estado efímero) + PostgreSQL en Aiven (usuarios, presentaciones persistidas) |
+| returnSlide                     | Campo adicional en `DemoState` — compatibilidad hacia atrás (campo nullable)        |
 
 ---
 
@@ -400,6 +457,7 @@ Secciones clave del doc de análisis por tarea:
 - ❌ No añadir lógica de negocio al `gateway-service`
 - ❌ No hacer que `ui-service` acceda a Redis directamente
 - ❌ No usar SDKs oficiales de Gemini o Groq — integrar solo vía HTTP con `WebClient`
+- ❌ No usar el SDK oficial de Google Drive — integrar solo vía HTTP con `WebClient`
 - ❌ No hardcodear API keys de Gemini/Groq — siempre leer de variables de entorno
 - ❌ No hardcodear URLs de otros servicios — usar Config Server o variables de entorno
 - ❌ No crear un servicio de BD/JPA si Redis es suficiente para el estado
@@ -407,12 +465,14 @@ Secciones clave del doc de análisis por tarea:
 - ❌ No implementar WebSockets todavía — el polling es suficiente para v1
 - ❌ No tocar el `pom.xml` raíz sin entender que es el parent de un multi-módulo Maven
 - ❌ No almacenar notas del presentador en Redis — pertenecen a MongoDB en `ai-service`
+- ❌ No almacenar guías de deploy en Redis — pertenecen a MongoDB en `ai-service`
 - ❌ No implementar multi-sesión (varias presentaciones en paralelo) — fuera de alcance v1
 - ❌ No usar Resend SDK oficial — integrar solo vía HTTP (`WebClient`) igual que Gemini/Groq
 - ❌ No hardcodear credenciales de AWS S3 ni Aiven — siempre leer de variables de entorno
 - ❌ No almacenar archivos de usuarios en el sistema de archivos local — todo a S3
 - ❌ No conectarse a una PostgreSQL fuera de Aiven en producción — usar `DATABASE_URL`
 - ❌ No configurar CORS, headers de trust ni IPs de Render manualmente por servicio; centralizar en `gateway-service`
+- ❌ No almacenar tokens OAuth2 (GitHub/Google) en texto plano en PostgreSQL — encriptar
 
 ---
 
@@ -507,4 +567,4 @@ webClient.post()
 
 ---
 
-*Actualizado: Febrero 2026 — v1 en elaboración*
+*Actualizado: Marzo 2026 — v1 completada (Fases 0-5)*

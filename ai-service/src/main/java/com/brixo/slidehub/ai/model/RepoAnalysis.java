@@ -2,7 +2,7 @@ package com.brixo.slidehub.ai.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,12 +18,12 @@ import java.util.List;
  * (Fase 5).
  */
 @Document(collection = "repo_analysis")
+@CompoundIndex(def = "{'repoUrl': 1}", unique = true)
 public class RepoAnalysis {
 
     @Id
     private String id;
 
-    @Indexed(unique = true)
     private String repoUrl;
 
     private LocalDateTime analyzedAt;
