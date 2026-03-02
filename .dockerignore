@@ -22,4 +22,3 @@ bin/
 .env.example
 docker-compose*.yml
 render.yaml
-Dockerfile
