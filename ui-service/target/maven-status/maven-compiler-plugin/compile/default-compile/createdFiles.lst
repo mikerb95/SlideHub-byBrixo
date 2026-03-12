@@ -2,6 +2,7 @@ com/brixo/slidehub/ui/controller/PresenterViewController.class
 com/brixo/slidehub/ui/controller/PresentationImportController.class
 com/brixo/slidehub/ui/service/EmailService.class
 com/brixo/slidehub/ui/service/GoogleDriveService.class
+com/brixo/slidehub/ui/config/DatabaseConfig$JdbcConnectionInfo.class
 com/brixo/slidehub/ui/model/SourceType.class
 com/brixo/slidehub/ui/model/DriveFolder.class
 com/brixo/slidehub/ui/controller/QuickLinkController.class
