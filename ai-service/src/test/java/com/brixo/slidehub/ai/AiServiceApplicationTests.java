@@ -1,8 +1,12 @@
 package com.brixo.slidehub.ai;
 
+import com.brixo.slidehub.ai.repository.DeploymentGuideRepository;
+import com.brixo.slidehub.ai.repository.PresenterNoteRepository;
+import com.brixo.slidehub.ai.repository.RepoAnalysisRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.TestPropertySource;
 
 /**
@@ -21,6 +25,15 @@ import org.springframework.test.context.TestPropertySource;
         "slidehub.ai.groq.api-key=test-key"
 })
 class AiServiceApplicationTests {
+
+    @MockitoBean
+    private PresenterNoteRepository presenterNoteRepository;
+
+    @MockitoBean
+    private RepoAnalysisRepository repoAnalysisRepository;
+
+    @MockitoBean
+    private DeploymentGuideRepository deploymentGuideRepository;
 
     @Test
     void contextLoads() {
