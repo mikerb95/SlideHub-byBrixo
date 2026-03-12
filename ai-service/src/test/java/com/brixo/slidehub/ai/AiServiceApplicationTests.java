@@ -14,8 +14,8 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK)
 @TestPropertySource(properties = {
         "spring.autoconfigure.exclude=org.springframework.boot.mongodb.autoconfigure.MongoAutoConfiguration,"
-        + "org.springframework.boot.data.mongodb.autoconfigure.DataMongoAutoConfiguration,"
-        + "org.springframework.boot.data.mongodb.autoconfigure.DataMongoRepositoriesAutoConfiguration",
+                + "org.springframework.boot.data.mongodb.autoconfigure.DataMongoAutoConfiguration,"
+                + "org.springframework.boot.data.mongodb.autoconfigure.DataMongoRepositoriesAutoConfiguration",
         "spring.data.mongodb.uri=mongodb://localhost:27017/slidehub-test",
         "slidehub.ai.gemini.api-key=test-key",
         "slidehub.ai.groq.api-key=test-key"
