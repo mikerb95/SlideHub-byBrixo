@@ -55,11 +55,6 @@
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-database-postgresql</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-database-h2</artifactId>
-			<version>11.14.1</version>
-		</dependency>
 		<!-- OAuth2 (GitHub + Google) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

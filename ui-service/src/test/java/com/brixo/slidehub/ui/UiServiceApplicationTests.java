@@ -12,7 +12,9 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK)
 @TestPropertySource(properties = {
         "slidehub.state-service.url=http://localhost:8081",
-        "slidehub.ai-service.url=http://localhost:8083"
+    "slidehub.ai-service.url=http://localhost:8083",
+    "spring.flyway.enabled=false",
+    "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 class UiServiceApplicationTests {
 
